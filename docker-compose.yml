@@ -1,0 +1,42 @@
+﻿services:
+  ecosena-db:
+    image: mysql:8.4
+    container_name: ecosena_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ecosena_mysql_data:/var/lib/mysql 
+    networks:
+      - ecosena_backend
+
+  ecosena-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecosena_api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DbConn=Server=ecosena-db;Port=3306;Database=${MYSQL_DATABASE};User=${MYSQL_USER};Password=${MYSQL_PASSWORD}
+      - JwtConfig__Key=${JWT_KEY}
+      - JwtConfig__Issuer=${JWT_ISSUER}
+      - JwtConfig__Audience=${JWT_AUDIENCE}
+      - JwtConfig__TokenValidityMins=${JWT_VALIDITY_MINS}
+    depends_on:
+      - ecosena-db
+    networks:
+      - ecosena_backend
+    user: appuser
+
+volumes:
+  ecosena_mysql_data:
+
+networks:
+  ecosena_backend:
+    driver: bridge
