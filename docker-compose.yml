@@ -2,6 +2,8 @@
   ecosena-db:
     image: mysql:8.4
     container_name: ecosena_mysql
+    ports:
+      - "3306:3306" 
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -28,11 +30,12 @@
       - JwtConfig__Issuer=${JWT_ISSUER}
       - JwtConfig__Audience=${JWT_AUDIENCE}
       - JwtConfig__TokenValidityMins=${JWT_VALIDITY_MINS}
+      - APRENDIZ_PASSWORD=${APRENDIZ_PASSWORD}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD} 
     depends_on:
       - ecosena-db
     networks:
       - ecosena_backend
-    user: appuser
 
 volumes:
   ecosena_mysql_data:
