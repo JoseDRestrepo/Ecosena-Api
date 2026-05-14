@@ -29,6 +29,7 @@ namespace EcoSENA.Api.Data
                     Apellido = "Nasraoui Ebana",
                     Documento = "1111111111",
                     Correo = "lamine_yamal@sena.edu.co",
+                    FechaNacimiento = new DateOnly(2007, 07, 13),
                     ContraseñaHash = BC.HashPassword(Environment.GetEnvironmentVariable("ADMIN_PASSWORD")),
                     Rol = RolUsuario.Administrador
                 }

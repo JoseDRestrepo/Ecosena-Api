@@ -1,5 +1,6 @@
 ﻿using EcoSENA.Api.Models;
 using EcoSENA.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +34,21 @@ namespace EcoSENA.Api.Controllers
             }
 
             return Ok(usuario);
+        }
+
+        //ENDPOINTS DE PRUEBA, DESPUES SE ELIMINARAN
+        [Authorize]
+        [HttpPost("logged-user")]
+        public ActionResult Logged()
+        {
+            return Ok("usuario loggeado");
+        }
+
+        [Authorize(Roles ="Administrador")]
+        [HttpPost("logged-admin")]
+        public ActionResult LoggedAdmin()
+        {
+            return Ok("admin loggeado");
         }
     }
 }
