@@ -45,16 +45,6 @@ namespace EcoSENA.Api.Services
                 return null;
             }
 
-            if(string.IsNullOrEmpty(req.Contraseña) || string.IsNullOrEmpty(req.ConfirmacionContraseña))
-            {
-                return null;
-            }
-
-            if(req.Contraseña != req.ConfirmacionContraseña)
-            {
-                return null;
-            }
-
             string hashed = BC.HashPassword(req.Contraseña);
 
             var usuario = new Usuario

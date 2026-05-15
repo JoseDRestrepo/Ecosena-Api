@@ -13,14 +13,24 @@ namespace EcoSENA.Api.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register(RegisterReqDto req)
         {
+            if (string.IsNullOrEmpty(req.Contraseña) || string.IsNullOrEmpty(req.ConfirmacionContraseña))
+            {
+                return BadRequest("Debe ingresar una contraseña");
+            }
+
+            if (req.Contraseña != req.ConfirmacionContraseña)
+            {
+                return BadRequest("Las contraseñas no coinciden");
+            }
+
             var usuario = await authService.RegisterAsync(req);
 
             if(usuario == null)
             {
-                return BadRequest("algo salio mal");
+                return BadRequest("Usuario ya registrado o inexistente en SofiaPlus");
             }
 
-            return Ok();
+            return StatusCode(StatusCodes.Status201Created, new { message= "Usuario registrado correctamente" });
         }
 
         [HttpPost("login")]
