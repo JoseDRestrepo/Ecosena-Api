@@ -7,11 +7,12 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using EcoSENA.Api.Entities.Sofia;
 
 
 namespace EcoSENA.Api.Services
 {
-    public class AuthService(EcosenaDbContext context, IConfiguration configuration) : IAuthService
+    public class AuthService(EcosenaDbContext context, SofiaDbContext sofiaContext, IConfiguration configuration) : IAuthService
     {
         public async Task<LoginResDto?> LoginAsync(LoginReqDto req)
         {
@@ -37,6 +38,13 @@ namespace EcoSENA.Api.Services
                 return null;
             }
 
+            var sofiaUsuario = await sofiaContext.SofiaUsuarios.FirstOrDefaultAsync(us => us.Documento == req.Documento);
+
+            if (sofiaUsuario == null)
+            {
+                return null;
+            }
+
             if(string.IsNullOrEmpty(req.Contraseña) || string.IsNullOrEmpty(req.ConfirmacionContraseña))
             {
                 return null;
@@ -53,16 +61,32 @@ namespace EcoSENA.Api.Services
             {
                 Documento = req.Documento,
                 Nombre = req.Nombre,
-                Correo = string.Empty,
+                Correo = sofiaUsuario.EmailPersonal,
                 Apellido = req.Apellido,
                 ContraseñaHash = hashed,
-                Rol = RolUsuario.Aprendiz
+                FechaNacimiento = sofiaUsuario.FechaNacimiento,
+                Rol = validarRol(sofiaUsuario.EmailSena)
             };
 
             context.Add(usuario);
             await context.SaveChangesAsync();
 
             return usuario;
+        }
+
+        private RolUsuario validarRol(string correoSena)
+        {
+            if (string.IsNullOrEmpty(correoSena))
+            {
+                return RolUsuario.Aprendiz;
+            } 
+
+            if (correoSena.Split('@').Last() == "sena.edu.co")
+            {
+                return RolUsuario.Administrador;
+            }
+
+            return RolUsuario.Aprendiz;
         }
 
         private string GenerateToken(Usuario usuario)

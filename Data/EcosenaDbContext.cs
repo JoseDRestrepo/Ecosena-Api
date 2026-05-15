@@ -8,6 +8,7 @@ namespace EcoSENA.Api.Data
     {
         public DbSet<Usuario> Usuarios { get; set; }
 
+        //datos de ejemplo
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

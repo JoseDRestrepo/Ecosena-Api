@@ -20,6 +20,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<EcosenaDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DbConn"), ServerVersion.Parse("8.4")));
 
+builder.Services.AddDbContext<SofiaDbContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("SenaConn"), ServerVersion.Parse("8.4")));
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
