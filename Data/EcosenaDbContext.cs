@@ -21,6 +21,8 @@ namespace EcoSENA.Api.Data
                     Documento = "0123456789",
                     Correo = "juan_bquez@soy.sena.edu.co",
                     ContraseñaHash = BC.HashPassword(Environment.GetEnvironmentVariable("APRENDIZ_PASSWORD")),
+                    Ficha = 333333,
+                    ProgramaFormacion = "ADSO",
                     Rol = RolUsuario.Aprendiz
                 },
                 new Usuario

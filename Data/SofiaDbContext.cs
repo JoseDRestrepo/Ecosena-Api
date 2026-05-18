@@ -67,6 +67,60 @@ namespace EcoSENA.Api.Data
                     FechaNacimiento = new DateOnly(1998, 12, 20)
                 }
             );
+
+            modelBuilder.Entity<ProgramaFormacion>().HasData(
+                new ProgramaFormacion
+                {
+                    Id = 1,
+                    Nombre = "ADSO"
+                },
+                new ProgramaFormacion
+                {
+                    Id = 2,
+                    Nombre = "Electricidad Industrial"
+                },
+                new ProgramaFormacion
+                {
+                    Id = 3,
+                    Nombre = "Animación 3D"
+                }
+            );
+
+            modelBuilder.Entity<Ficha>().HasData(
+                new Ficha 
+                { 
+                    Id = 1,
+                    Numero = 333333,
+                    ProgramaFormacionId = 1
+                },
+                new Ficha
+                { 
+                    Id = 2,
+                    Numero = 333334,
+                    ProgramaFormacionId = 2,
+                },
+                new Ficha
+                { 
+                    Id = 3,
+                    Numero = 333344,
+                    ProgramaFormacionId = 3,
+                }
+            );
+
+            modelBuilder.Entity<Matricula>().HasData(
+                new Matricula
+                {
+                    Id = 1,
+                    AprendizId = 2,
+                    FichaId = 2
+                },
+                new Matricula
+                {
+                    Id = 3,
+                    AprendizId = 4,
+                    FichaId = 3
+                }
+            );
         }
     }
 }

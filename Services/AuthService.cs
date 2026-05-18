@@ -38,7 +38,11 @@ namespace EcoSENA.Api.Services
                 return null;
             }
 
-            var sofiaUsuario = await sofiaContext.SofiaUsuarios.FirstOrDefaultAsync(us => us.Documento == req.Documento);
+            var sofiaUsuario = await sofiaContext.SofiaUsuarios
+                .Include(us => us.Matriculas)
+                .ThenInclude(m => m.Ficha)
+                .ThenInclude(f => f.ProgramaFormacion)
+                .FirstOrDefaultAsync(us => us.Documento == req.Documento);
 
             if (sofiaUsuario == null)
             {
@@ -55,6 +59,8 @@ namespace EcoSENA.Api.Services
                 Apellido = req.Apellido,
                 ContraseñaHash = hashed,
                 FechaNacimiento = sofiaUsuario.FechaNacimiento,
+                Ficha = sofiaUsuario.Matriculas.Select(m => m.Ficha?.Numero).FirstOrDefault(),
+                ProgramaFormacion = sofiaUsuario.Matriculas.Select(m => m.Ficha?.ProgramaFormacion.Nombre).FirstOrDefault(),
                 Rol = validarRol(sofiaUsuario.EmailSena)
             };
 
