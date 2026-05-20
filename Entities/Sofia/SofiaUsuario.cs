@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcoSENA.Api.Entities.Sofia
 {
     [Table("Usuarios")]
     public class SofiaUsuario
     {
+        [Key]
         [Column("Id")]
         public required int Id { get; set; }
 
@@ -22,5 +24,7 @@ namespace EcoSENA.Api.Entities.Sofia
 
         [Column("fecha_nacimiento")]
         public required DateOnly FechaNacimiento { get; set; }
+
+        public List<Matricula> Matriculas { get; set; } = new List<Matricula>();
     }
 }

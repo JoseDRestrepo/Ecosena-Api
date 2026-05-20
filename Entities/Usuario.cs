@@ -29,10 +29,19 @@ namespace EcoSENA.Api.Entities
 
         [Column("email")]
         [StringLength(50)]
-        public string? Correo { get; set; }
+        public required string Correo { get; set; }
 
         [Column("fecha_nacimiento")]
         public DateOnly? FechaNacimiento { get; set; }
+
+        [Column("foto_perfil")]
+        public string? FotoPerfil { get; set; }
+
+        [Column("programa_formacion")]
+        public string? ProgramaFormacion { get; set; }
+
+        [Column("ficha")]
+        public int? Ficha { get; set; }
 
         [Column("rol", TypeName ="varchar(20)")]
         [StringLength(20)]
