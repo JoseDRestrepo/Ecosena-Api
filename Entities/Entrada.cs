@@ -22,6 +22,6 @@ namespace EcoSENA.Api.Entities
         public string? Portada { get; set; }
 
         [Column("fecha_publicacion")]
-        public required DateTime FechaPublicacion { get; set; } = DateTime.Now;
+        public required DateTime FechaPublicacion { get; set; } = DateTime.UtcNow;
     }
 }
