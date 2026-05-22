@@ -1,12 +1,10 @@
 ﻿namespace EcoSENA.Api.Models
 {
-    public class EntradaResDto
+    public class BlogListResDto
     {
         public int Id { get; set; }
 
         public string Titulo { get; set; } = string.Empty;
-
-        public string Contenido { get; set; } = string.Empty;
 
         public string? Portada { get; set; }
 

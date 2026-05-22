@@ -23,5 +23,11 @@ namespace EcoSENA.Api.Entities
 
         [Column("fecha_publicacion")]
         public required DateTime FechaPublicacion { get; set; } = DateTime.UtcNow;
+
+        [Column("id_redactor")]
+        public int RedactorId { get; set; }
+
+        [ForeignKey(nameof(RedactorId))]
+        public Usuario Redactor { get; set; }
     }
 }
