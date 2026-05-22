@@ -7,6 +7,7 @@ namespace EcoSENA.Api.Data
     public class EcosenaDbContext(DbContextOptions<EcosenaDbContext> options) : DbContext(options)
     {
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Entrada> Entradas { get; set; }
 
         //datos de ejemplo
         protected override void OnModelCreating(ModelBuilder modelBuilder)
