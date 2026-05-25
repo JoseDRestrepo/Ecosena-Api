@@ -17,14 +17,17 @@ namespace EcoSENA.Api.Entities
         [Column("descripcion")]
         public required string Descripcion { get; set; }
 
+        [Column("ubicacion")]
+        public required string Ubicacion { get; set; }
+
         [Column("fecha_publicacion")]
-        public required DateTime FechaEmision { get; set; }
+        public required DateOnly FechaEmision { get; set; }
 
         [Column("fecha_revision")]
-        public required DateTime FechaRevision { get; set; }
+        public required DateOnly FechaRevision { get; set; }
 
         [Column("fecha_solucion")]
-        public required DateTime FechaSolucion { get; set; }
+        public required DateOnly FechaSolucion { get; set; }
 
         [Column("estado")]
         public required string Estado { get; set; } = "Pendiente";
