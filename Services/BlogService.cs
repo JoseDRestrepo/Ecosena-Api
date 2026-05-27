@@ -46,14 +46,15 @@ namespace EcoSENA.Api.Services
         public async Task<List<BlogListResDto>> GetEntradasAsync()
         {
             var entradas = await context.Entradas.Include(e => e.Redactor)
-            .Select(e => new BlogListResDto
-            {
-                Id = e.Id,
-                Titulo = e.Titulo,
-                FechaPublicacion= e.FechaPublicacion,
-                NombreRedactor = $"{e.Redactor.Nombre} {e.Redactor.Apellido}",
-                Portada= e.Portada
-            }).ToListAsync();
+                .OrderByDescending(e => e.FechaPublicacion)
+                .Select(e => new BlogListResDto
+                {
+                    Id = e.Id,
+                    Titulo = e.Titulo,
+                    FechaPublicacion= e.FechaPublicacion,
+                    NombreRedactor = $"{e.Redactor.Nombre} {e.Redactor.Apellido}",
+                    Portada= e.Portada
+                }).ToListAsync();
 
             return entradas;
         }

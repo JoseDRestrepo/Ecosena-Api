@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcoSENA.Api.Entities
 {
-    [Table("notificaciones")]
+    [Table("Notificaciones")]
     public class Notificacion
     {
         [Key]

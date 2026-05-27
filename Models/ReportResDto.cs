@@ -1,4 +1,6 @@
-﻿namespace EcoSENA.Api.Models
+﻿using EcoSENA.Api.Entities;
+
+namespace EcoSENA.Api.Models
 {
     public class ReportResDto
     {
@@ -6,6 +8,7 @@
         public string Titulo { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public string EmisorReporte { get; set; } = string.Empty;
-        public string Estado { get; set; } = string.Empty;
+        public string Foto { get; set; } = string.Empty; 
+        public EstadoReporte Estado { get; set; }
     }
 }

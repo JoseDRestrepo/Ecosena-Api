@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcoSENA.Api.Entities
 {
-    [Table("reportes")]
+    [Table("Reportes")]
     public class Reporte
     {
         [Key]
@@ -12,30 +12,44 @@ namespace EcoSENA.Api.Entities
         public int Id { get; set; }
 
         [Column("titulo")]
+        [StringLength(50)]
         public required string Titulo { get; set; }
 
         [Column("descripcion")]
+        [StringLength(150)]
         public required string Descripcion { get; set; }
 
         [Column("ubicacion")]
+        [StringLength(100)]
         public required string Ubicacion { get; set; }
 
+        [Column("foto")]
+        public required string Foto { get; set; }
+
         [Column("fecha_publicacion")]
-        public required DateOnly FechaEmision { get; set; }
+        public required DateTime FechaEmision { get; set; }
 
         [Column("fecha_revision")]
-        public required DateOnly FechaRevision { get; set; }
+        public DateTime? FechaRevision { get; set; }
 
         [Column("fecha_solucion")]
-        public required DateOnly FechaSolucion { get; set; }
+        public DateTime? FechaSolucion { get; set; }
 
-        [Column("estado")]
-        public required string Estado { get; set; } = "Pendiente";
+        [Column("estado", TypeName ="varchar(20)")]
+        [StringLength(20)]
+        public required EstadoReporte Estado { get; set; } 
 
         [Column("id_aprendiz")]
         public int AprendizId { get; set; }
 
         [ForeignKey(nameof(AprendizId))]
         public Usuario Aprendiz { get; set; }
+    }
+
+    public enum EstadoReporte
+    {
+        Pendiente,
+        EnProgreso,
+        Resuelto
     }
 }

@@ -9,6 +9,7 @@ namespace EcoSENA.Api.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Entrada> Entradas { get; set; }
         public DbSet<Reporte> Reportes { get; set; }
+        public DbSet<Notificacion> Notificaciones { get; set; }
 
         //datos de ejemplo
         protected override void OnModelCreating(ModelBuilder modelBuilder)
