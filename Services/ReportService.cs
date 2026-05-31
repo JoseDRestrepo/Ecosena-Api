@@ -1,11 +1,12 @@
 ﻿using EcoSENA.Api.Data;
 using EcoSENA.Api.Entities;
-using EcoSENA.Api.Models;
+using EcoSENA.Api.Interfaces;
+using EcoSENA.Api.Models.Reports;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoSENA.Api.Services
 {
-    public class ReportService(EcosenaDbContext context) : IReportService
+    public class ReportService(EcosenaDbContext context, ICloudinaryService cloudinary) : IReportService
     {
         public async Task<List<ReportListResDto>> GetReportsAsync()
         {
@@ -59,13 +60,20 @@ namespace EcoSENA.Api.Services
 
         public async Task<ReportResDto> PostReportAsync(ReportReqDto req, int redactorId)
         {
+            var foto = await cloudinary.UploadImageAsync(req.Foto, "ecosena_reports");
+
+            if (string.IsNullOrEmpty(foto))
+            {
+                throw new ArgumentException("La imagen es requerida para el reporte");
+            }
+            
             var reporte = new Reporte
             {
                 Titulo = req.Titulo,
                 Descripcion = req.Descripcion,
                 Estado = EstadoReporte.Pendiente,
                 Ubicacion = req.Ubicacion,
-                Foto = req.Foto,
+                Foto = foto,
                 FechaEmision = DateTime.UtcNow,
                 AprendizId = redactorId
             };

@@ -1,5 +1,7 @@
+using CloudinaryDotNet;
 using DotNetEnv;
 using EcoSENA.Api.Data;
+using EcoSENA.Api.Interfaces;
 using EcoSENA.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -39,10 +41,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
+
+var cloudinary = new Cloudinary(new Account(
+        cloudinaryConfig["CloudName"],
+        cloudinaryConfig["ApiKey"],
+        cloudinaryConfig["ApiSecret"]
+    ));
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IBlogService,  BlogService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddSingleton(cloudinary);
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 var app = builder.Build();
 

@@ -1,9 +1,10 @@
 ﻿using EcoSENA.Api.Data;
 using EcoSENA.Api.Entities;
-using EcoSENA.Api.Models;
 
 using BC = BCrypt.Net.BCrypt;
 using System.Security.Claims;
+using EcoSENA.Api.Interfaces;
+using EcoSENA.Api.Models.Profile;
 
 namespace EcoSENA.Api.Services
 {

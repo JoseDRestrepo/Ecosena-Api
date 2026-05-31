@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EcoSENA.Api.Models
+namespace EcoSENA.Api.Models.Blog
 {
     public class EditEntradaReqDto
     {
@@ -9,6 +9,6 @@ namespace EcoSENA.Api.Models
 
         public string Contenido { get; set; } = string.Empty;
 
-        public string? Portada { get; set; }
+        public IFormFile? Portada { get; set; }
     }
 }

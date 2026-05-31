@@ -49,6 +49,9 @@
       - JwtConfig__TokenValidityMins=${JWT_VALIDITY_MINS}
       - APRENDIZ_PASSWORD=${APRENDIZ_PASSWORD}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD} 
+      - Cloudinary__CloudName=${CLOUD_NAME}
+      - Cloudinary__ApiKey=${CLOUD_API_KEY}
+      - Cloudinary__ApiSecret=${CLOUD_API_SECRET}
     depends_on:
       - ecosena-db
       - senasofia-db 

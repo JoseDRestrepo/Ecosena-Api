@@ -1,11 +1,12 @@
 ﻿using EcoSENA.Api.Data;
 using EcoSENA.Api.Entities;
-using EcoSENA.Api.Models;
+using EcoSENA.Api.Interfaces;
+using EcoSENA.Api.Models.Blog;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoSENA.Api.Services
 {
-    public class BlogService(EcosenaDbContext context) : IBlogService
+    public class BlogService(EcosenaDbContext context, ICloudinaryService cloudinary) : IBlogService
     {
         public async Task<bool> DeleteEntradaAsync(int id)
         {
@@ -61,11 +62,13 @@ namespace EcoSENA.Api.Services
 
         public async Task<EntradaResDto> PostEntradaAsync(PostEntradaReqDto req, int redactorId)
         {
+            string portada = await GetPortada(req.Portada);
+
             var entrada = new Entrada
             {
                 Titulo = req.Titulo,
                 Contenido = req.Contenido,
-                Portada = req.Portada,
+                Portada = portada,
                 RedactorId = redactorId,
                 FechaPublicacion = DateTime.UtcNow
             };
@@ -88,8 +91,22 @@ namespace EcoSENA.Api.Services
             return entradaRes;
         }
 
+        private async Task<string> GetPortada(IFormFile? req)
+        {
+            string portada = await cloudinary.UploadImageAsync(req, "ecosena_blog");
+
+            if (string.IsNullOrEmpty(portada))
+            {
+                portada = Environment.GetEnvironmentVariable("DEFAULT_IMAGE_BLOG");
+            }
+
+            return portada;
+        }
+
         public async Task<bool> UpdateEntradaAsync(int id, EditEntradaReqDto req)
         {
+            var portada = await GetPortada(req.Portada);
+
             var entrada = await context.Entradas.FindAsync(id);
 
             if (entrada == null)
@@ -99,7 +116,7 @@ namespace EcoSENA.Api.Services
 
             entrada.Titulo = req.Titulo;
             entrada.Contenido = req.Contenido;
-            entrada.Portada = req.Portada;
+            entrada.Portada = portada;
             
             context.Update(entrada);
             await context.SaveChangesAsync();

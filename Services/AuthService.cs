@@ -1,13 +1,14 @@
 ﻿using BC = BCrypt.Net.BCrypt;
 using EcoSENA.Api.Data;
 using EcoSENA.Api.Entities;
-using EcoSENA.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using EcoSENA.Api.Entities.Sofia;
+using EcoSENA.Api.Interfaces;
+using EcoSENA.Api.Models.Auth;
 
 
 namespace EcoSENA.Api.Services

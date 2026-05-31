@@ -1,7 +1,7 @@
 ﻿using EcoSENA.Api.Entities;
-using EcoSENA.Api.Models;
+using EcoSENA.Api.Models.Blog;
 
-namespace EcoSENA.Api.Services
+namespace EcoSENA.Api.Interfaces
 {
     public interface IBlogService
     {
