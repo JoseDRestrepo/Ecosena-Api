@@ -35,7 +35,7 @@ namespace EcoSENA.Api.Entities
         public DateOnly? FechaNacimiento { get; set; }
 
         [Column("foto_perfil")]
-        public string? FotoPerfil { get; set; }
+        public required string FotoPerfil { get; set; }
 
         [Column("programa_formacion")]
         public string? ProgramaFormacion { get; set; }

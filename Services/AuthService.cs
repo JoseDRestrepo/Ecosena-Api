@@ -60,6 +60,7 @@ namespace EcoSENA.Api.Services
                 Apellido = req.Apellido,
                 ContraseñaHash = hashed,
                 FechaNacimiento = sofiaUsuario.FechaNacimiento,
+                FotoPerfil = Environment.GetEnvironmentVariable("DEFAULT_IMAGE_PROFILE"),
                 Ficha = sofiaUsuario.Matriculas.Select(m => m.Ficha?.Numero).FirstOrDefault(),
                 ProgramaFormacion = sofiaUsuario.Matriculas.Select(m => m.Ficha?.ProgramaFormacion.Nombre).FirstOrDefault(),
                 Rol = validarRol(sofiaUsuario.EmailSena)

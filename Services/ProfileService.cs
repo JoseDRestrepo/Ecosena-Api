@@ -8,7 +8,7 @@ using EcoSENA.Api.Models.Profile;
 
 namespace EcoSENA.Api.Services
 {
-    public class ProfileService(EcosenaDbContext context) : IProfileService
+    public class ProfileService(EcosenaDbContext context, ICloudinaryService cloudinary) : IProfileService
     {
         public async Task<ProfileResDto> GetProfileAsync(int? id)
         {
@@ -52,6 +52,13 @@ namespace EcoSENA.Api.Services
             if (!string.IsNullOrEmpty(req.Contraseña) && !string.IsNullOrEmpty(req.ConfirmacionContraseña))
             {
                 user.ContraseñaHash = BC.HashPassword(req.Contraseña);
+            }
+
+            string? fotoPerfil = await cloudinary.UploadImageAsync(req.FotoPerfil, "ecosena_profiles");
+            
+            if (!string.IsNullOrEmpty (fotoPerfil))
+            {
+                user.FotoPerfil = fotoPerfil;
             }
 
             await context.SaveChangesAsync();
