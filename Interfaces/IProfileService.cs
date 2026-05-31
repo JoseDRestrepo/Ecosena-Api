@@ -1,7 +1,7 @@
 ﻿using EcoSENA.Api.Entities;
-using EcoSENA.Api.Models;
+using EcoSENA.Api.Models.Profile;
 
-namespace EcoSENA.Api.Services
+namespace EcoSENA.Api.Interfaces
 {
     public interface IProfileService
     {

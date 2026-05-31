@@ -1,6 +1,6 @@
 ﻿using EcoSENA.Api.Entities;
 
-namespace EcoSENA.Api.Models
+namespace EcoSENA.Api.Models.Reports
 {
     public class ReportListResDto
     {

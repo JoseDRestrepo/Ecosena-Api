@@ -1,5 +1,5 @@
-﻿using EcoSENA.Api.Models;
-using EcoSENA.Api.Services;
+﻿using EcoSENA.Api.Interfaces;
+using EcoSENA.Api.Models.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -1,6 +1,6 @@
-﻿using EcoSENA.Api.Models;
+﻿using EcoSENA.Api.Models.Reports;
 
-namespace EcoSENA.Api.Services
+namespace EcoSENA.Api.Interfaces
 {
     public interface IReportService
     {

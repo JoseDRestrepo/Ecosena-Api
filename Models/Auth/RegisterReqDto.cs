@@ -1,4 +1,4 @@
-﻿namespace EcoSENA.Api.Models
+﻿namespace EcoSENA.Api.Models.Auth
 {
     public class RegisterReqDto
     {

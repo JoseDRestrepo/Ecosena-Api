@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EcoSENA.Api.Models
+namespace EcoSENA.Api.Models.Profile
 {
     public class EditProfileReqDto
     {
@@ -12,5 +12,7 @@ namespace EcoSENA.Api.Models
         public string? Contraseña { get; set; }
 
         public string? ConfirmacionContraseña { get; set; }
+
+        public IFormFile? FotoPerfil { get; set; }
     }
 }
