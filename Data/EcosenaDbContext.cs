@@ -16,6 +16,8 @@ namespace EcoSENA.Api.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            const string defaultProfileImage = "https://res.cloudinary.com/denixbxml/image/upload/v1780584233/pfp_yutpht.png";
+
             modelBuilder.Entity<Usuario>().HasData(
                 new Usuario {
                     Id = 1,
@@ -24,6 +26,7 @@ namespace EcoSENA.Api.Data
                     Documento = "0123456789",
                     Correo = "juan_bquez@soy.sena.edu.co",
                     ContraseñaHash = BC.HashPassword(Environment.GetEnvironmentVariable("APRENDIZ_PASSWORD")),
+                    FotoPerfil = defaultProfileImage,
                     Ficha = 333333,
                     ProgramaFormacion = "ADSO",
                     Rol = RolUsuario.Aprendiz
@@ -36,6 +39,7 @@ namespace EcoSENA.Api.Data
                     Documento = "1111111111",
                     Correo = "lamine_yamal@sena.edu.co",
                     FechaNacimiento = new DateOnly(2007, 07, 13),
+                    FotoPerfil = defaultProfileImage,
                     ContraseñaHash = BC.HashPassword(Environment.GetEnvironmentVariable("ADMIN_PASSWORD")),
                     Rol = RolUsuario.Administrador
                 }
