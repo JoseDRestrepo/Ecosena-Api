@@ -35,9 +35,9 @@ namespace EcoSENA.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_reportes", x => x.id);
+                    table.PrimaryKey("PK_Reportes", x => x.id);
                     table.ForeignKey(
-                        name: "FK_reportes_Usuarios_id_aprendiz",
+                        name: "FK_Reportes_Usuarios_id_aprendiz",
                         column: x => x.id_aprendiz,
                         principalTable: "Usuarios",
                         principalColumn: "id_usuario",
@@ -59,17 +59,17 @@ namespace EcoSENA.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_notificaciones", x => x.id);
+                    table.PrimaryKey("PK_Notificaciones", x => x.id);
                     table.ForeignKey(
-                        name: "FK_notificaciones_Usuarios_id_usuario",
+                        name: "FK_Notificaciones_Usuarios_id_usuario",
                         column: x => x.id_usuario,
                         principalTable: "Usuarios",
                         principalColumn: "id_usuario",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_notificaciones_reportes_id_reporte",
+                        name: "FK_Notificaciones_Reportes_id_reporte",
                         column: x => x.id_reporte,
-                        principalTable: "reportes",
+                        principalTable: "Reportes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -90,43 +90,24 @@ namespace EcoSENA.Api.Migrations
                 value: "$2a$11$qIzyh3o1IBCwXrlmk7I1A.k0ZDQZVdjCEWEIpLh65wbfYUgDJfWFS");
 
             migrationBuilder.CreateIndex(
-                name: "IX_notificaciones_id_reporte",
-                table: "notificaciones",
+                name: "IX_Notificaciones_id_reporte",
+                table: "Notificaciones",
                 column: "id_reporte");
 
             migrationBuilder.CreateIndex(
-                name: "IX_notificaciones_id_usuario",
-                table: "notificaciones",
+                name: "IX_Notificaciones_id_usuario",
+                table: "Notificaciones",
                 column: "id_usuario");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_reportes_id_aprendiz",
-                table: "reportes",
-                column: "id_aprendiz");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "notificaciones");
+                name: "Notificaciones");
 
             migrationBuilder.DropTable(
-                name: "reportes");
-
-            migrationBuilder.UpdateData(
-                table: "Usuarios",
-                keyColumn: "id_usuario",
-                keyValue: 1,
-                column: "contrasenia",
-                value: "$2a$11$e63wLe3jBw5iPoKa4p6R2u5Gjx.u/nFcSDnXGivk90Rq3gQk49UPS");
-
-            migrationBuilder.UpdateData(
-                table: "Usuarios",
-                keyColumn: "id_usuario",
-                keyValue: 2,
-                column: "contrasenia",
-                value: "$2a$11$qig0Hk1ggciu7DIpj3K1Tues1DXci06ycoUPzyYRemrKIqYKt2xKq");
+                name: "Reportes");
         }
     }
 }
