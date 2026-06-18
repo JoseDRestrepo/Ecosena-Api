@@ -1,36 +1,4 @@
 ﻿services:
-  ecosena-db:
-    image: mysql:8.4
-    container_name: ecosena_mysql
-    ports:
-      - "3306:3306" 
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - ecosena_mysql_data:/var/lib/mysql 
-    networks:
-      - ecosena_backend
-
-  senasofia-db:
-    image: mysql:8.4
-    container_name: senasofia_mysql
-    ports:
-      - "3309:3306" 
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_SENA_DATABASE}
-      MYSQL_USER: ${MYSQL_SENA_USER}
-      MYSQL_PASSWORD: ${MYSQL_SENA_PASSWORD}
-    volumes:
-      - sofiasena_mysql_data:/var/lib/mysql
-    networks:
-      - ecosena_backend
-
   ecosena-api:
     build:
       context: .
@@ -41,8 +9,8 @@
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DbConn=Server=ecosena-db;Port=3306;Database=${MYSQL_DATABASE};User=${MYSQL_USER};Password=${MYSQL_PASSWORD}
-      - ConnectionStrings__SenaConn=Server=senasofia-db;Port=3306;Database=${MYSQL_SENA_DATABASE};User=${MYSQL_SENA_USER};Password=${MYSQL_SENA_PASSWORD}
+      - ConnectionStrings__DbConn=Server=mysql-141504c1-joserestrepo-48f4.k.aivencloud.com;Port=27666;Database=${MYSQL_DATABASE};User=${MYSQL_USER};Password=${MYSQL_PASSWORD};SslMode=Required
+      - ConnectionStrings__SenaConn=Server=mysql-141504c1-joserestrepo-48f4.k.aivencloud.com;Port=27666;Database=${MYSQL_SENA_DATABASE};User=${MYSQL_SENA_USER};Password=${MYSQL_SENA_PASSWORD};SslMode=Required
       - JwtConfig__Key=${JWT_KEY}
       - JwtConfig__Issuer=${JWT_ISSUER}
       - JwtConfig__Audience=${JWT_AUDIENCE}
@@ -52,15 +20,8 @@
       - Cloudinary__CloudName=${CLOUD_NAME}
       - Cloudinary__ApiKey=${CLOUD_API_KEY}
       - Cloudinary__ApiSecret=${CLOUD_API_SECRET}
-    depends_on:
-      - ecosena-db
-      - senasofia-db 
     networks:
       - ecosena_backend
-
-volumes:
-  ecosena_mysql_data:
-  sofiasena_mysql_data:
 
 networks:
   ecosena_backend:

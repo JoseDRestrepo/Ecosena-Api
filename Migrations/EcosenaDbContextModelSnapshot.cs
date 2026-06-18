@@ -58,7 +58,7 @@ namespace EcoSENA.Api.Migrations
 
                     b.HasIndex("RedactorId");
 
-                    b.ToTable("Entradas");
+                    b.ToTable("Entradas", (string)null);
                 });
 
             modelBuilder.Entity("EcoSENA.Api.Entities.Notificacion", b =>
@@ -96,7 +96,7 @@ namespace EcoSENA.Api.Migrations
 
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("Notificaciones");
+                    b.ToTable("Notificaciones", (string)null);
                 });
 
             modelBuilder.Entity("EcoSENA.Api.Entities.Reporte", b =>
@@ -157,7 +157,7 @@ namespace EcoSENA.Api.Migrations
 
                     b.HasIndex("AprendizId");
 
-                    b.ToTable("Reportes");
+                    b.ToTable("Reportes", (string)null);
                 });
 
             modelBuilder.Entity("EcoSENA.Api.Entities.Usuario", b =>
@@ -224,7 +224,7 @@ namespace EcoSENA.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Usuarios", (string)null);
 
                     b.HasData(
                         new
