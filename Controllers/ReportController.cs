@@ -77,6 +77,21 @@ namespace EcoSENA.Api.Controllers
             return NoContent();
         }
 
+        [HttpGet("/ReportsExcel")]
+        [Authorize(Roles= "Administrador")]
+        public async Task<IActionResult> GetExcelReports()
+        {
+            var bytes = await service.ExportarExcelMesActualAsync();
+
+            var nombre = $"reportes_{DateTime.UtcNow:yyyy_MM}.xlsx";
+
+            return File(
+                bytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                nombre
+            );
+        }
+
 
         private int GetUserIdFromToken()
         {
