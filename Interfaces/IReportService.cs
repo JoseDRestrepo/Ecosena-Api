@@ -9,6 +9,7 @@ namespace EcoSENA.Api.Interfaces
         public Task<ReportResDto> GetReportAsync(int id);
         public Task<ReportResDto> PostReportAsync(ReportReqDto req, int redactorId);
         public Task<bool> UpdateReportAsync(int id);
+        public Task<StatsReportDto> GetStats();
         public Task<byte[]> ExportarExcelMesActualAsync();
     }
 }

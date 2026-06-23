@@ -55,6 +55,7 @@ builder.Services.AddScoped<IBlogService,  BlogService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSingleton(cloudinary);
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddSingleton<ICensorshipService, CensorshipService>();
 
 var app = builder.Build();
 

@@ -125,6 +125,37 @@ namespace EcoSENA.Api.Services
             return true;
         }
 
+        public async Task<StatsReportDto> GetStats()
+        {
+            var fechaActual = DateTime.UtcNow;
+            var primerDia = new DateTime(fechaActual.Year, fechaActual.Month, 1);
+            var FinDeMes = primerDia.AddMonths(1);
+
+            var totalReportesMes = await context.Reportes
+                .Where(r => r.FechaEmision >= primerDia && r.FechaEmision <= FinDeMes)
+                .CountAsync();
+
+            var totalPendientes = await context.Reportes
+                .Where(r => r.Estado == EstadoReporte.Pendiente)
+                .CountAsync();
+
+            var totalEnProgreso = await context.Reportes
+                .Where(r => r.Estado == EstadoReporte.EnProgreso)
+                .CountAsync();
+
+            var totalResueltosMes = await context.Reportes
+                .Where(r => r.FechaSolucion >= primerDia && r.FechaSolucion <= FinDeMes)
+                .CountAsync();
+
+            return new StatsReportDto
+            {
+                ReportesHechosMes = totalReportesMes,
+                ReportesPendientes = totalPendientes,
+                ReportesEnProgreso = totalEnProgreso,
+                ReportesResueltosMes = totalResueltosMes
+            };
+        }
+
         public async Task<byte[]> ExportarExcelMesActualAsync()
         {
             var fechaActual = DateTime.UtcNow;

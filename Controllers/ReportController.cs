@@ -10,7 +10,7 @@ namespace EcoSENA.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ReportController(IReportService service) : ControllerBase
+    public class ReportController(IReportService service, ICensorshipService censorship) : ControllerBase
     {
         [HttpGet("AllReports")]
         [Authorize(Roles ="Administrador")]
@@ -56,6 +56,12 @@ namespace EcoSENA.Api.Controllers
         public async Task<ActionResult<ReportResDto>> PostReport(ReportReqDto req)
         {
             int AprendizId = GetUserIdFromToken();
+
+            if (censorship.EsSoez(req.Descripcion) || censorship.EsSoez(req.Titulo))
+            {
+                return BadRequest("El contenido del reporte no puede contener palabras soeces");
+            }
+
             var reporte = await service.PostReportAsync(req, AprendizId);
             if (reporte == null)
             {
@@ -76,6 +82,13 @@ namespace EcoSENA.Api.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("/Estadisticas")]
+        [Authorize(Roles= "Administrador")]
+        public async Task<ActionResult<StatsReportDto>> GetEstadisticas()
+        {
+            return Ok(service.GetStats());
+        } 
 
         [HttpGet("/ReportsExcel")]
         [Authorize(Roles= "Administrador")]
