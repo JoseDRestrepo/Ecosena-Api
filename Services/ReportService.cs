@@ -1,11 +1,14 @@
-﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using EcoSENA.Api.Data;
+﻿using EcoSENA.Api.Data;
 using EcoSENA.Api.Entities;
 using EcoSENA.Api.Interfaces;
 using EcoSENA.Api.Models.Reports;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using OfficeOpenXml;
+using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Table;
+using System.Drawing;
 
 namespace EcoSENA.Api.Services
 {
@@ -162,6 +165,7 @@ namespace EcoSENA.Api.Services
             var primerDia = new DateTime(fechaActual.Year, fechaActual.Month, 1);
             var FinDeMes = primerDia.AddMonths(1);
 
+            // === OBTENER ESTADÍSTICAS ===
             var estadisticas = await context.Reportes
                 .Where(r => r.FechaEmision >= primerDia && r.FechaEmision < FinDeMes)
                 .GroupBy(r => r.Estado)
@@ -171,7 +175,7 @@ namespace EcoSENA.Api.Services
                     Cantidad = e.Count()
                 })
                 .AsNoTracking()
-                .ToDictionaryAsync(x=> x.Estado, x => x.Cantidad);
+                .ToDictionaryAsync(x => x.Estado, x => x.Cantidad);
 
             int Stat(EstadoReporte estado) => estadisticas.GetValueOrDefault(estado, 0);
 
@@ -187,6 +191,7 @@ namespace EcoSENA.Api.Services
             var porcentajeEnProgreso = Porcentaje(enProgreso);
             var porcentajeResueltos = Porcentaje(resueltos);
 
+            // === OBTENER LISTA DE REPORTES ===
             var reportes = await context.Reportes
                 .Include(r => r.Aprendiz)
                 .Where(r => r.FechaEmision >= primerDia && r.FechaEmision < FinDeMes)
@@ -205,25 +210,36 @@ namespace EcoSENA.Api.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            using var workbook = new XLWorkbook();
-            var hojaEstadisticas = workbook.Worksheets.Add("Estadisticas");
+            // === CREAR EXCEL CON EPPLUS ===
+            // ✅ CORRECCIÓN: Usar la forma correcta de configurar la licencia en EPPlus 8
+            ExcelPackage.License.SetNonCommercialPersonal("EcoSENA");
+            using var package = new ExcelPackage();
 
-            var titulo = hojaEstadisticas.Cell(1, 1);
-            titulo.Value = $"Estadísticas - {fechaActual:MMMM yyyy}";
-            titulo.Style.Font.Bold = true;
-            titulo.Style.Font.FontSize = 14;
-            hojaEstadisticas.Range("A1:C1").Merge();
+            // ============================================================
+            // HOJA 1: ESTADÍSTICAS
+            // ============================================================
+            var hojaEstadisticas = package.Workbook.Worksheets.Add("Estadisticas");
 
-            hojaEstadisticas.Cell(3, 1).Value = "Estado";
-            hojaEstadisticas.Cell(3, 2).Value = "Cantidad";
-            hojaEstadisticas.Cell(3, 3).Value = "Porcentaje";
-            foreach (var cell in hojaEstadisticas.Range("A3:C3").Cells())
+            // --- TÍTULO ---
+            hojaEstadisticas.Cells[1, 1].Value = $"Estadísticas - {fechaActual:MMMM yyyy}";
+            hojaEstadisticas.Cells[1, 1, 1, 3].Merge = true;
+            hojaEstadisticas.Cells[1, 1].Style.Font.Size = 14;
+            hojaEstadisticas.Cells[1, 1].Style.Font.Bold = true;
+
+            // --- ENCABEZADOS ---
+            hojaEstadisticas.Cells[3, 1].Value = "Estado";
+            hojaEstadisticas.Cells[3, 2].Value = "Cantidad";
+            hojaEstadisticas.Cells[3, 3].Value = "Porcentaje";
+
+            using (var range = hojaEstadisticas.Cells[3, 1, 3, 3])
             {
-                cell.Style.Font.Bold = true;
-                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#31AD44");
-                cell.Style.Font.FontColor = XLColor.White;
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(49, 173, 68));
+                range.Style.Font.Color.SetColor(Color.White);
             }
 
+            // --- DATOS ---
             var stats = new[]
             {
                 ("Pendientes", pendientes, porcentajePendientes),
@@ -234,49 +250,109 @@ namespace EcoSENA.Api.Services
 
             for (int i = 0; i < stats.Length; i++)
             {
-                hojaEstadisticas.Cell(i + 4, 1).Value = stats[i].Item1;
-                hojaEstadisticas.Cell(i + 4, 2).Value = stats[i].Item2;
-                hojaEstadisticas.Cell(i + 4, 3).Value =stats[i].Item3;
+                hojaEstadisticas.Cells[i + 4, 1].Value = stats[i].Item1;
+                hojaEstadisticas.Cells[i + 4, 2].Value = stats[i].Item2;
+                hojaEstadisticas.Cells[i + 4, 3].Value = stats[i].Item3;
             }
 
-            hojaEstadisticas.Columns().AdjustToContents();
+            // --- TABLA FORMAL ---
+            var tablaRango = hojaEstadisticas.Cells[3, 1, 7, 3];
+            var tablaEstadisticas = hojaEstadisticas.Tables.Add(tablaRango, "TablaEstadisticas");
+            tablaEstadisticas.TableStyle = OfficeOpenXml.Table.TableStyles.Medium9;
+            tablaEstadisticas.ShowFilter = true;
 
-            var hojaLista = workbook.Worksheets.Add("Reportes");
+            // --- 📊 GRÁFICO 1: PASTEL (CORREGIDO) ---
+            var pieChart = hojaEstadisticas.Drawings.AddChart("PieChart", eChartType.Pie);
+            pieChart.SetPosition(1, 0, 5, 0);
+            pieChart.SetSize(400, 280);
 
+            var seriePie = pieChart.Series.Add(
+                hojaEstadisticas.Cells[4, 3, 6, 3],
+                hojaEstadisticas.Cells[4, 1, 6, 1]
+            );
+            seriePie.Header = "Porcentaje por Estado";
+
+            pieChart.Title.Text = "Distribución de Reportes (%)";
+            pieChart.Title.Font.Size = 14;
+            pieChart.Title.Font.Bold = true;
+
+            // --- 📊 GRÁFICO 2: BARRAS COMBINADO ---
+            var barChart = hojaEstadisticas.Drawings.AddChart("BarChart", eChartType.ColumnClustered);
+            barChart.SetPosition(18, 0, 5, 0);
+            barChart.SetSize(500, 280);
+
+            var serieCantidad = barChart.Series.Add(
+                hojaEstadisticas.Cells[4, 2, 6, 2],
+                hojaEstadisticas.Cells[4, 1, 6, 1]
+            );
+            serieCantidad.Header = "Cantidad";
+
+            var seriePorcentajeBar = barChart.Series.Add(
+                hojaEstadisticas.Cells[4, 3, 6, 3],
+                hojaEstadisticas.Cells[4, 1, 6, 1]
+            );
+            seriePorcentajeBar.Header = "Porcentaje (%)";
+
+
+            barChart.Title.Text = "Comparativa: Cantidad vs Porcentaje";
+            barChart.Title.Font.Size = 14;
+            barChart.Title.Font.Bold = true;
+
+            // --- Ajustar columnas ---
+            hojaEstadisticas.Cells[hojaEstadisticas.Dimension.Address].AutoFitColumns();
+
+            // ============================================================
+            // HOJA 2: LISTA DE REPORTES
+            // ============================================================
+            var hojaLista = package.Workbook.Worksheets.Add("Reportes");
+
+            // --- ENCABEZADOS ---
             var headers = new[]
             {
-                "ID", "Titulo", "Descripción", "Ubicación", "Estado", "Fecha Publicación", "Fecha Revisión", "Fecha Solución", "Aprendiz"
+                "ID", "Titulo", "Descripción", "Ubicación", "Estado",
+                "Fecha Publicación", "Fecha Revisión", "Fecha Solución", "Aprendiz"
             };
 
-            for (int i=0; i < headers.Length; i++)
+            for (int i = 0; i < headers.Length; i++)
             {
-                var cell = hojaLista.Cell(1, i + 1);
+                var cell = hojaLista.Cells[1, i + 1];
                 cell.Value = headers[i];
                 cell.Style.Font.Bold = true;
-                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#31AD44");
-                cell.Style.Font.FontColor = XLColor.White;
+                cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(49, 173, 68));
+                cell.Style.Font.Color.SetColor(Color.White);
             }
 
-            for (int i = 0; i< reportes.Count; i++)
+            // --- DATOS ---
+            for (int i = 0; i < reportes.Count; i++)
             {
                 var reporte = reportes[i];
                 var row = i + 2;
-                hojaLista.Cell(row, 1).Value = reporte.Id;
-                hojaLista.Cell(row, 2).Value = reporte.Titulo;
-                hojaLista.Cell(row, 3).Value = reporte.Descripcion;
-                hojaLista.Cell(row, 4).Value = reporte.Ubicacion;
-                hojaLista.Cell(row, 5).Value = reporte.Estado;
-                hojaLista.Cell(row, 6).Value = reporte.FechaPublicacion.ToString("yyyy-MM-dd HH:mm");
-                hojaLista.Cell(row, 7).Value = reporte.FechaRevision?.ToString("yyyy-MM-dd HH:mm") ?? "-";
-                hojaLista.Cell(row, 8).Value = reporte.FechaSolucion?.ToString("yyyy-MM-dd HH:mm") ?? "-";
-                hojaLista.Cell(row, 9).Value = reporte.Aprendiz;
+                hojaLista.Cells[row, 1].Value = reporte.Id;
+                hojaLista.Cells[row, 2].Value = reporte.Titulo;
+                hojaLista.Cells[row, 3].Value = reporte.Descripcion;
+                hojaLista.Cells[row, 4].Value = reporte.Ubicacion;
+                hojaLista.Cells[row, 5].Value = reporte.Estado;
+                hojaLista.Cells[row, 6].Value = reporte.FechaPublicacion.ToString("yyyy-MM-dd HH:mm");
+                hojaLista.Cells[row, 7].Value = reporte.FechaRevision?.ToString("yyyy-MM-dd HH:mm") ?? "-";
+                hojaLista.Cells[row, 8].Value = reporte.FechaSolucion?.ToString("yyyy-MM-dd HH:mm") ?? "-";
+                hojaLista.Cells[row, 9].Value = reporte.Aprendiz;
             }
 
-            hojaLista.Columns().AdjustToContents();
+            // --- TABLA FORMAL ---
+            if (reportes.Count > 0)
+            {
+                var ultimaFila = reportes.Count + 1;
+                var rangoReportes = hojaLista.Cells[1, 1, ultimaFila, headers.Length];
+                var tablaReportes = hojaLista.Tables.Add(rangoReportes, "TablaReportes");
+                tablaReportes.TableStyle = OfficeOpenXml.Table.TableStyles.Medium9;
+                tablaReportes.ShowFilter = true;
+            }
 
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            return stream.ToArray();
+            hojaLista.Cells[hojaLista.Dimension.Address].AutoFitColumns();
+
+            // === GUARDAR ===
+            return await package.GetAsByteArrayAsync();
         }
     }
 }
