@@ -165,8 +165,8 @@ namespace EcoSENA.Api.Services
             var primerDia = new DateTime(fechaActual.Year, fechaActual.Month, 1);
             var FinDeMes = primerDia.AddMonths(1);
 
-            // === OBTENER ESTADÍSTICAS ===
-            var estadisticas = await context.Reportes
+            // === OBTENER ESTADÍSTICAS DEL MES ===
+            var estadisticasMes = await context.Reportes
                 .Where(r => r.FechaEmision >= primerDia && r.FechaEmision < FinDeMes)
                 .GroupBy(r => r.Estado)
                 .Select(e => new
@@ -177,21 +177,46 @@ namespace EcoSENA.Api.Services
                 .AsNoTracking()
                 .ToDictionaryAsync(x => x.Estado, x => x.Cantidad);
 
-            int Stat(EstadoReporte estado) => estadisticas.GetValueOrDefault(estado, 0);
+            int StatMes(EstadoReporte estado) => estadisticasMes.GetValueOrDefault(estado, 0);
 
-            var pendientes = Stat(EstadoReporte.Pendiente);
-            var enProgreso = Stat(EstadoReporte.EnProgreso);
-            var resueltos = Stat(EstadoReporte.Resuelto);
-            var total = estadisticas.Values.Sum();
+            var pendientesMes = StatMes(EstadoReporte.Pendiente);
+            var enProgresoMes = StatMes(EstadoReporte.EnProgreso);
+            var resueltosMes = StatMes(EstadoReporte.Resuelto);
+            var totalMes = estadisticasMes.Values.Sum();
 
-            double Porcentaje(int dato) =>
-                dato > 0 ? Math.Round((double)dato * 100 / total, 2) : 0;
+            double PorcentajeMes(int dato) =>
+                dato > 0 ? Math.Round((double)dato * 100 / totalMes, 2) : 0;
 
-            var porcentajePendientes = Porcentaje(pendientes);
-            var porcentajeEnProgreso = Porcentaje(enProgreso);
-            var porcentajeResueltos = Porcentaje(resueltos);
+            var porcentajePendientesMes = PorcentajeMes(pendientesMes);
+            var porcentajeEnProgresoMes = PorcentajeMes(enProgresoMes);
+            var porcentajeResueltosMes = PorcentajeMes(resueltosMes);
 
-            // === OBTENER LISTA DE REPORTES ===
+            // === OBTENER ESTADÍSTICAS GLOBALES (TODOS LOS MESES) ===
+            var estadisticasGlobales = await context.Reportes
+                .GroupBy(r => r.Estado)
+                .Select(e => new
+                {
+                    Estado = e.Key,
+                    Cantidad = e.Count()
+                })
+                .AsNoTracking()
+                .ToDictionaryAsync(x => x.Estado, x => x.Cantidad);
+
+            int StatGlobal(EstadoReporte estado) => estadisticasGlobales.GetValueOrDefault(estado, 0);
+
+            var pendientesGlobal = StatGlobal(EstadoReporte.Pendiente);
+            var enProgresoGlobal = StatGlobal(EstadoReporte.EnProgreso);
+            var resueltosGlobal = StatGlobal(EstadoReporte.Resuelto);
+            var totalGlobal = estadisticasGlobales.Values.Sum();
+
+            double PorcentajeGlobal(int dato) =>
+                dato > 0 ? Math.Round((double)dato * 100 / totalGlobal, 2) : 0;
+
+            var porcentajePendientesGlobal = PorcentajeGlobal(pendientesGlobal);
+            var porcentajeEnProgresoGlobal = PorcentajeGlobal(enProgresoGlobal);
+            var porcentajeResueltosGlobal = PorcentajeGlobal(resueltosGlobal);
+
+            // === OBTENER LISTA DE REPORTES DEL MES ===
             var reportes = await context.Reportes
                 .Include(r => r.Aprendiz)
                 .Where(r => r.FechaEmision >= primerDia && r.FechaEmision < FinDeMes)
@@ -211,12 +236,11 @@ namespace EcoSENA.Api.Services
                 .ToListAsync();
 
             // === CREAR EXCEL CON EPPLUS ===
-            // ✅ CORRECCIÓN: Usar la forma correcta de configurar la licencia en EPPlus 8
             ExcelPackage.License.SetNonCommercialPersonal("EcoSENA");
             using var package = new ExcelPackage();
 
             // ============================================================
-            // HOJA 1: ESTADÍSTICAS
+            // HOJA 1: ESTADÍSTICAS CON TABLAS Y GRÁFICOS
             // ============================================================
             var hojaEstadisticas = package.Workbook.Worksheets.Add("Estadisticas");
 
@@ -226,10 +250,12 @@ namespace EcoSENA.Api.Services
             hojaEstadisticas.Cells[1, 1].Style.Font.Size = 14;
             hojaEstadisticas.Cells[1, 1].Style.Font.Bold = true;
 
-            // --- ENCABEZADOS ---
+            // ============================================================
+            // SECCIÓN 1: TABLA DEL MES (Columnas A-C, Filas 3-7)
+            // ============================================================
             hojaEstadisticas.Cells[3, 1].Value = "Estado";
-            hojaEstadisticas.Cells[3, 2].Value = "Cantidad";
-            hojaEstadisticas.Cells[3, 3].Value = "Porcentaje";
+            hojaEstadisticas.Cells[3, 2].Value = "Cantidad (Mes)";
+            hojaEstadisticas.Cells[3, 3].Value = "Porcentaje (Mes)";
 
             using (var range = hojaEstadisticas.Cells[3, 1, 3, 3])
             {
@@ -239,74 +265,158 @@ namespace EcoSENA.Api.Services
                 range.Style.Font.Color.SetColor(Color.White);
             }
 
-            // --- DATOS ---
-            var stats = new[]
+            var statsMes = new[]
             {
-                ("Pendientes", pendientes, porcentajePendientes),
-                ("En Progreso", enProgreso, porcentajeEnProgreso),
-                ("Resueltos", resueltos, porcentajeResueltos),
-                ("Total", total, 100)
+                ("Pendientes", pendientesMes, porcentajePendientesMes),
+                ("En Progreso", enProgresoMes, porcentajeEnProgresoMes),
+                ("Resueltos", resueltosMes, porcentajeResueltosMes),
+                ("Total", totalMes, 100)
             };
 
-            for (int i = 0; i < stats.Length; i++)
+            for (int i = 0; i < statsMes.Length; i++)
             {
-                hojaEstadisticas.Cells[i + 4, 1].Value = stats[i].Item1;
-                hojaEstadisticas.Cells[i + 4, 2].Value = stats[i].Item2;
-                hojaEstadisticas.Cells[i + 4, 3].Value = stats[i].Item3;
+                hojaEstadisticas.Cells[i + 4, 1].Value = statsMes[i].Item1;
+                hojaEstadisticas.Cells[i + 4, 2].Value = statsMes[i].Item2;
+                hojaEstadisticas.Cells[i + 4, 3].Value = statsMes[i].Item3;
             }
 
-            // --- TABLA FORMAL ---
-            var tablaRango = hojaEstadisticas.Cells[3, 1, 7, 3];
-            var tablaEstadisticas = hojaEstadisticas.Tables.Add(tablaRango, "TablaEstadisticas");
-            tablaEstadisticas.TableStyle = OfficeOpenXml.Table.TableStyles.Medium9;
-            tablaEstadisticas.ShowFilter = true;
+            var tablaRangoMes = hojaEstadisticas.Cells[3, 1, 7, 3];
+            var tablaEstadisticasMes = hojaEstadisticas.Tables.Add(tablaRangoMes, "TablaEstadisticasMes");
+            tablaEstadisticasMes.TableStyle = OfficeOpenXml.Table.TableStyles.Medium9;
+            tablaEstadisticasMes.ShowFilter = true;
 
-            // --- 📊 GRÁFICO 1: PASTEL (CORREGIDO) ---
-            var pieChart = hojaEstadisticas.Drawings.AddChart("PieChart", eChartType.Pie);
-            pieChart.SetPosition(1, 0, 5, 0);
-            pieChart.SetSize(400, 280);
+            // --- 📊 GRÁFICO 1: PASTEL DEL MES (Columna E, Filas 3-7) ---
+            var pieChartMes = hojaEstadisticas.Drawings.AddChart("PieChartMes", eChartType.Pie);
+            pieChartMes.SetPosition(3, 0, 4, 0);
+            pieChartMes.SetSize(350, 220);
 
-            var seriePie = pieChart.Series.Add(
+            var seriePieMes = pieChartMes.Series.Add(
                 hojaEstadisticas.Cells[4, 3, 6, 3],
                 hojaEstadisticas.Cells[4, 1, 6, 1]
             );
-            seriePie.Header = "Porcentaje por Estado";
+            seriePieMes.Header = "Porcentaje por Estado (Mes)";
 
-            pieChart.Title.Text = "Distribución de Reportes (%)";
-            pieChart.Title.Font.Size = 14;
-            pieChart.Title.Font.Bold = true;
+            pieChartMes.Title.Text = $"Distribución - {fechaActual:MMMM yyyy}";
+            pieChartMes.Title.Font.Size = 11;
+            pieChartMes.Title.Font.Bold = true;
 
-            // --- 📊 GRÁFICO 2: BARRAS COMBINADO ---
-            var barChart = hojaEstadisticas.Drawings.AddChart("BarChart", eChartType.ColumnClustered);
-            barChart.SetPosition(18, 0, 5, 0);
-            barChart.SetSize(500, 280);
+            // ============================================================
+            // SECCIÓN 2: TABLA GLOBAL (Columnas A-C, Filas 12-16) - MOVIDA 5 FILAS MÁS ABAJO
+            // ============================================================
+            hojaEstadisticas.Cells[12, 1].Value = "Estado";
+            hojaEstadisticas.Cells[12, 2].Value = "Cantidad (Global)";
+            hojaEstadisticas.Cells[12, 3].Value = "Porcentaje (Global)";
 
-            var serieCantidad = barChart.Series.Add(
-                hojaEstadisticas.Cells[4, 2, 6, 2],
-                hojaEstadisticas.Cells[4, 1, 6, 1]
+            using (var rangeGlobal = hojaEstadisticas.Cells[12, 1, 12, 3])
+            {
+                rangeGlobal.Style.Font.Bold = true;
+                rangeGlobal.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                rangeGlobal.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 102, 204));
+                rangeGlobal.Style.Font.Color.SetColor(Color.White);
+            }
+
+            var statsGlobal = new[]
+            {
+                ("Pendientes", pendientesGlobal, porcentajePendientesGlobal),
+                ("En Progreso", enProgresoGlobal, porcentajeEnProgresoGlobal),
+                ("Resueltos", resueltosGlobal, porcentajeResueltosGlobal),
+                ("Total", totalGlobal, 100)
+            };
+
+            for (int i = 0; i < statsGlobal.Length; i++)
+            {
+                hojaEstadisticas.Cells[i + 13, 1].Value = statsGlobal[i].Item1;
+                hojaEstadisticas.Cells[i + 13, 2].Value = statsGlobal[i].Item2;
+                hojaEstadisticas.Cells[i + 13, 3].Value = statsGlobal[i].Item3;
+            }
+
+            var tablaRangoGlobal = hojaEstadisticas.Cells[12, 1, 16, 3];
+            var tablaEstadisticasGlobal = hojaEstadisticas.Tables.Add(tablaRangoGlobal, "TablaEstadisticasGlobal");
+            tablaEstadisticasGlobal.TableStyle = OfficeOpenXml.Table.TableStyles.Medium9;
+            tablaEstadisticasGlobal.ShowFilter = true;
+
+            // --- 📊 GRÁFICO 2: PASTEL GLOBAL (Columna I, Filas 12-16) - MOVIDO CON SU TABLA ---
+            var pieChartGlobal = hojaEstadisticas.Drawings.AddChart("PieChartGlobal", eChartType.Pie);
+            pieChartGlobal.SetPosition(3, 0, 12, 60);
+            pieChartGlobal.SetSize(350, 220);
+
+            var seriePieGlobal = pieChartGlobal.Series.Add(
+                hojaEstadisticas.Cells[13, 3, 15, 3],
+                hojaEstadisticas.Cells[13, 1, 15, 1]
             );
-            serieCantidad.Header = "Cantidad";
+            seriePieGlobal.Header = "Porcentaje por Estado (Global)";
 
-            var seriePorcentajeBar = barChart.Series.Add(
-                hojaEstadisticas.Cells[4, 3, 6, 3],
-                hojaEstadisticas.Cells[4, 1, 6, 1]
+            pieChartGlobal.Title.Text = "Distribución Global";
+            pieChartGlobal.Title.Font.Size = 11;
+            pieChartGlobal.Title.Font.Bold = true;
+
+            // ============================================================
+            // SECCIÓN 3: TABLA COMPARATIVA (Columnas E-G, Filas 23-27) - MOVIDA MÁS ABAJO
+            // ============================================================
+            hojaEstadisticas.Cells[23, 5].Value = "Comparativa de Porcentajes";
+            hojaEstadisticas.Cells[23, 5, 23, 7].Merge = true;
+            hojaEstadisticas.Cells[23, 5].Style.Font.Size = 14;
+            hojaEstadisticas.Cells[23, 5].Style.Font.Bold = true;
+
+            hojaEstadisticas.Cells[24, 5].Value = "Estado";
+            hojaEstadisticas.Cells[24, 6].Value = "Mes %";
+            hojaEstadisticas.Cells[24, 7].Value = "Global %";
+
+            using (var rangeComparativa = hojaEstadisticas.Cells[24, 5, 24, 7])
+            {
+                rangeComparativa.Style.Font.Bold = true;
+                rangeComparativa.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                rangeComparativa.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 128, 0));
+                rangeComparativa.Style.Font.Color.SetColor(Color.White);
+            }
+
+            var comparativa = new[]
+            {
+                ("Pendientes", porcentajePendientesMes, porcentajePendientesGlobal),
+                ("En Progreso", porcentajeEnProgresoMes, porcentajeEnProgresoGlobal),
+                ("Resueltos", porcentajeResueltosMes, porcentajeResueltosGlobal)
+            };
+
+            for (int i = 0; i < comparativa.Length; i++)
+            {
+                hojaEstadisticas.Cells[i + 25, 5].Value = comparativa[i].Item1;
+                hojaEstadisticas.Cells[i + 25, 6].Value = comparativa[i].Item2;
+                hojaEstadisticas.Cells[i + 25, 7].Value = comparativa[i].Item3;
+            }
+
+            // --- 📊 GRÁFICO 3: BARRAS COMPARATIVO (Columna I, Filas 23-27) - MOVIDO CON SU TABLA ---
+            var barChartComparativo = hojaEstadisticas.Drawings.AddChart("BarChartComparativo", eChartType.ColumnClustered);
+            barChartComparativo.SetPosition(23, 0, 9, 0);
+            barChartComparativo.SetSize(450, 250);
+
+            var serieMes = barChartComparativo.Series.Add(
+                hojaEstadisticas.Cells[25, 6, 27, 6],
+                hojaEstadisticas.Cells[25, 5, 27, 5]
             );
-            seriePorcentajeBar.Header = "Porcentaje (%)";
+            serieMes.Header = "Mes %";
 
+            var serieGlobal = barChartComparativo.Series.Add(
+                hojaEstadisticas.Cells[25, 7, 27, 7],
+                hojaEstadisticas.Cells[25, 5, 27, 5]
+            );
+            serieGlobal.Header = "Global %";
 
-            barChart.Title.Text = "Comparativa: Cantidad vs Porcentaje";
-            barChart.Title.Font.Size = 14;
-            barChart.Title.Font.Bold = true;
+            barChartComparativo.Title.Text = "Comparativa: Mes vs Global";
+            barChartComparativo.Title.Font.Size = 11;
+            barChartComparativo.Title.Font.Bold = true;
+
+            barChartComparativo.YAxis.Title.Text = "Porcentaje (%)";
+            barChartComparativo.YAxis.Title.Font.Size = 9;
+            barChartComparativo.YAxis.Title.Font.Bold = true;
 
             // --- Ajustar columnas ---
             hojaEstadisticas.Cells[hojaEstadisticas.Dimension.Address].AutoFitColumns();
 
             // ============================================================
-            // HOJA 2: LISTA DE REPORTES
+            // HOJA 2: LISTA DE REPORTES DEL MES
             // ============================================================
             var hojaLista = package.Workbook.Worksheets.Add("Reportes");
 
-            // --- ENCABEZADOS ---
             var headers = new[]
             {
                 "ID", "Titulo", "Descripción", "Ubicación", "Estado",
@@ -323,7 +433,6 @@ namespace EcoSENA.Api.Services
                 cell.Style.Font.Color.SetColor(Color.White);
             }
 
-            // --- DATOS ---
             for (int i = 0; i < reportes.Count; i++)
             {
                 var reporte = reportes[i];
@@ -339,7 +448,6 @@ namespace EcoSENA.Api.Services
                 hojaLista.Cells[row, 9].Value = reporte.Aprendiz;
             }
 
-            // --- TABLA FORMAL ---
             if (reportes.Count > 0)
             {
                 var ultimaFila = reportes.Count + 1;
@@ -351,7 +459,6 @@ namespace EcoSENA.Api.Services
 
             hojaLista.Cells[hojaLista.Dimension.Address].AutoFitColumns();
 
-            // === GUARDAR ===
             return await package.GetAsByteArrayAsync();
         }
     }
