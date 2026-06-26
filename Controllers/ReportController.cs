@@ -3,6 +3,7 @@ using EcoSENA.Api.Models.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace EcoSENA.Api.Controllers
@@ -10,6 +11,7 @@ namespace EcoSENA.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting("general")]
     public class ReportController(IReportService service, ICensorshipService censorship) : ControllerBase
     {
         [HttpGet("AllReports")]
@@ -53,6 +55,7 @@ namespace EcoSENA.Api.Controllers
 
         [HttpPost]
         [Authorize(Roles ="Aprendiz")]
+        [EnableRateLimiting("uploads")]
         public async Task<ActionResult<ReportResDto>> PostReport(ReportReqDto req)
         {
             int AprendizId = GetUserIdFromToken();

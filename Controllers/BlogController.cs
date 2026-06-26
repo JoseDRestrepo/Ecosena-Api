@@ -4,12 +4,14 @@ using EcoSENA.Api.Models.Blog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace EcoSENA.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("general")]
     public class BlogController(IBlogService service) : ControllerBase
     {
         [HttpGet]
@@ -37,6 +39,7 @@ namespace EcoSENA.Api.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Administrador")]
+        [EnableRateLimiting("uploads")]
         public async Task<ActionResult<EntradaResDto>> PostEntrada(PostEntradaReqDto req)
         {
             int id = GetUserIdFromToken();
