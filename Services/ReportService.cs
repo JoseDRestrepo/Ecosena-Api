@@ -286,7 +286,7 @@ namespace EcoSENA.Api.Services
                 ("Pendientes", pendientesMes, porcentajePendientesMes),
                 ("En Progreso", enProgresoMes, porcentajeEnProgresoMes),
                 ("Resueltos", resueltosMes, porcentajeResueltosMes),
-                ("Total", totalMes, 100)
+                ("Total", totalMes, porcentajePendientesMes + porcentajeEnProgresoMes + porcentajeResueltosMes)
             };
 
             for (int i = 0; i < statsMes.Length; i++)
@@ -336,7 +336,7 @@ namespace EcoSENA.Api.Services
                 ("Pendientes", pendientesGlobal, porcentajePendientesGlobal),
                 ("En Progreso", enProgresoGlobal, porcentajeEnProgresoGlobal),
                 ("Resueltos", resueltosGlobal, porcentajeResueltosGlobal),
-                ("Total", totalGlobal, 100)
+                ("Total", totalGlobal, porcentajePendientesGlobal + porcentajeEnProgresoGlobal + porcentajeResueltosGlobal)
             };
 
             for (int i = 0; i < statsGlobal.Length; i++)

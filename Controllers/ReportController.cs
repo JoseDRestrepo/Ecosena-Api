@@ -1,5 +1,7 @@
-﻿using EcoSENA.Api.Interfaces;
+﻿using EcoSENA.Api.Entities;
+using EcoSENA.Api.Interfaces;
 using EcoSENA.Api.Models.Reports;
+using EcoSENA.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +14,7 @@ namespace EcoSENA.Api.Controllers
     [ApiController]
     [Authorize]
     [EnableRateLimiting("general")]
-    public class ReportController(IReportService service, ICensorshipService censorship) : ControllerBase
+    public class ReportController(IReportService service, ICensorshipService censorship, IPenalizacionService penalizacion) : ControllerBase
     {
         [HttpGet("AllReports")]
         [Authorize(Roles ="Administrador")]
@@ -60,16 +62,23 @@ namespace EcoSENA.Api.Controllers
         {
             int AprendizId = GetUserIdFromToken();
 
-            var ambienteActivo = await service.ReporteActivo(req.IdAmbiente);
-
-            if (ambienteActivo)
+            var (bloqueado, expiracion) = await penalizacion.VerificarPenalizacion(AprendizId);
+            if (bloqueado)
             {
-                return BadRequest("El ambiente ya tiene un reporte activo");
+                return Forbid("Usted se encuentra penalizado por lo que no puede generar reportes");
             }
 
             if (censorship.EsSoez(req.Descripcion) || censorship.EsSoez(req.Titulo))
             {
                 return BadRequest("El contenido del reporte no puede contener palabras soeces");
+                await penalizacion.RegistrarIntento(AprendizId);
+            }
+
+            var ambienteActivo = await service.ReporteActivo(req.IdAmbiente);
+
+            if (ambienteActivo)
+            {
+                return BadRequest("El ambiente ya tiene un reporte activo");
             }
 
             var reporte = await service.PostReportAsync(req, AprendizId);
@@ -113,6 +122,15 @@ namespace EcoSENA.Api.Controllers
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 nombre
             );
+        }
+
+        [HttpDelete("{reporteId}/penalizar")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> PenalizarReporte(int reporteId)
+        {
+            int adminId = GetUserIdFromToken();
+            await penalizacion.PenalizacionAdmin(adminId, reporteId);
+            return NoContent();
         }
 
 

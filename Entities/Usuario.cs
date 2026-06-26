@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace EcoSENA.Api.Entities
 {
@@ -46,11 +47,15 @@ namespace EcoSENA.Api.Entities
         [Column("rol", TypeName ="varchar(20)")]
         [StringLength(20)]
         public required RolUsuario Rol { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Infraccion> Infracciones { get; set; } = [];
     }
 
     public enum RolUsuario
     {
         Aprendiz,
-        Administrador
+        Administrador,
+        Penalizado
     }
 }
