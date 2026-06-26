@@ -1,4 +1,5 @@
-﻿using EcoSENA.Api.Models.Reports;
+﻿using EcoSENA.Api.Entities;
+using EcoSENA.Api.Models.Reports;
 
 namespace EcoSENA.Api.Interfaces
 {
@@ -9,6 +10,8 @@ namespace EcoSENA.Api.Interfaces
         public Task<ReportResDto> GetReportAsync(int id);
         public Task<ReportResDto> PostReportAsync(ReportReqDto req, int redactorId);
         public Task<bool> UpdateReportAsync(int id);
+        public Task<IEnumerable<Ambiente>> GetListaAmbientes();
+        public Task<bool> ReporteActivo(int id);
         public Task<StatsReportDto> GetStats();
         public Task<byte[]> ExportarExcelMesActualAsync();
     }

@@ -4,6 +4,7 @@ using EcoSENA.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcoSENA.Api.Migrations
 {
     [DbContext(typeof(EcosenaDbContext))]
-    partial class EcosenaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260626183352_AddAmbientes")]
+    partial class AddAmbientes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,10 +209,6 @@ namespace EcoSENA.Api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AmbienteId")
-                        .HasColumnType("int")
-                        .HasColumnName("id_ambiente");
-
                     b.Property<int>("AprendizId")
                         .HasColumnType("int")
                         .HasColumnName("id_aprendiz");
@@ -249,9 +248,13 @@ namespace EcoSENA.Api.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("titulo");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Ubicacion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("ubicacion");
 
-                    b.HasIndex("AmbienteId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AprendizId");
 
@@ -329,7 +332,7 @@ namespace EcoSENA.Api.Migrations
                         {
                             Id = 1,
                             Apellido = "Bohorquez",
-                            ContraseñaHash = "$2a$11$M8juu4wWI6tVbS6xDt62K.PsIpxM0G9..1DirLywkdAe79vitYhbe",
+                            ContraseñaHash = "$2a$11$ivaGxTI5XyzWYMgWzkBh0OdsZeEMa.gf653l5QpZo7n3aZtjfGPJu",
                             Correo = "juan_bquez@soy.sena.edu.co",
                             Documento = "0123456789",
                             Ficha = 333333,
@@ -342,7 +345,7 @@ namespace EcoSENA.Api.Migrations
                         {
                             Id = 2,
                             Apellido = "Nasraoui Ebana",
-                            ContraseñaHash = "$2a$11$mxHjvlal9murxeM831cwM.xDRgkW/7855DGO37ppH0kAsarxRIlI6",
+                            ContraseñaHash = "$2a$11$z9sruJmhgtA7qYdugJroweZ3VyvNLALMvW5TgobIHoGmwL0XRIDXm",
                             Correo = "lamine_yamal@sena.edu.co",
                             Documento = "1111111111",
                             FechaNacimiento = new DateOnly(2007, 7, 13),
@@ -384,19 +387,11 @@ namespace EcoSENA.Api.Migrations
 
             modelBuilder.Entity("EcoSENA.Api.Entities.Reporte", b =>
                 {
-                    b.HasOne("EcoSENA.Api.Entities.Ambiente", "Ambiente")
-                        .WithMany()
-                        .HasForeignKey("AmbienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("EcoSENA.Api.Entities.Usuario", "Aprendiz")
                         .WithMany()
                         .HasForeignKey("AprendizId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Ambiente");
 
                     b.Navigation("Aprendiz");
                 });

@@ -57,6 +57,13 @@ namespace EcoSENA.Api.Controllers
         {
             int AprendizId = GetUserIdFromToken();
 
+            var ambienteActivo = await service.ReporteActivo(req.IdAmbiente);
+
+            if (ambienteActivo)
+            {
+                return BadRequest("El ambiente ya tiene un reporte activo");
+            }
+
             if (censorship.EsSoez(req.Descripcion) || censorship.EsSoez(req.Titulo))
             {
                 return BadRequest("El contenido del reporte no puede contener palabras soeces");

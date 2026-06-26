@@ -17,12 +17,13 @@ namespace EcoSENA.Api.Services
         public async Task<List<ReportListResDto>> GetReportsAsync()
         {
             var reportes = await context.Reportes
+                .Include(r=> r.Ambiente)
                 .OrderByDescending(r=> r.FechaEmision)
                 .Select(r => new ReportListResDto
                 {
                     Id = r.Id,
                     Estado = r.Estado,
-                    Ubicacion = r.Ubicacion,
+                    Ubicacion = r.Ambiente.Nombre,
                     FechaEmision = r.FechaEmision
                 }).ToListAsync();
 
@@ -31,14 +32,14 @@ namespace EcoSENA.Api.Services
 
         public async Task<List<ReportListResDto>> GetReportsAprendizAsync(int id)
         {
-            var reportes = await context.Reportes
+            var reportes = await context.Reportes.Include(r=> r.Ambiente)
                 .OrderByDescending(r => r.FechaEmision)
                 .Where(r => r.AprendizId == id)
                 .Select(r => new ReportListResDto
                 {
                     Id = r.Id,
                     Estado = r.Estado,
-                    Ubicacion = r.Ubicacion,
+                    Ubicacion = r.Ambiente.Nombre,
                     FechaEmision = r.FechaEmision
                 }).ToListAsync();
 
@@ -64,6 +65,21 @@ namespace EcoSENA.Api.Services
             };
         }
 
+        public async Task<IEnumerable<Ambiente>> GetListaAmbientes()
+        {
+            var listaAmbientes = await context.Ambientes.ToListAsync();
+
+            return listaAmbientes;
+        }
+
+        public async Task<bool> ReporteActivo(int id)
+        {
+            var estadoReporte = await context.Ambientes.Where(a=> a.Id == id)
+                .Select(a=> a.ReporteActivo).FirstOrDefaultAsync();
+
+            return estadoReporte;
+        }
+
         public async Task<ReportResDto> PostReportAsync(ReportReqDto req, int redactorId)
         {
             var foto = await cloudinary.UploadImageAsync(req.Foto, "ecosena_reports");
@@ -78,7 +94,7 @@ namespace EcoSENA.Api.Services
                 Titulo = req.Titulo,
                 Descripcion = req.Descripcion,
                 Estado = EstadoReporte.Pendiente,
-                Ubicacion = req.Ubicacion,
+                AmbienteId = req.IdAmbiente,
                 Foto = foto,
                 FechaEmision = DateTime.UtcNow,
                 AprendizId = redactorId
@@ -217,7 +233,7 @@ namespace EcoSENA.Api.Services
             var porcentajeResueltosGlobal = PorcentajeGlobal(resueltosGlobal);
 
             // === OBTENER LISTA DE REPORTES DEL MES ===
-            var reportes = await context.Reportes
+            var reportes = await context.Reportes.Include(r=> r.Ambiente)
                 .Include(r => r.Aprendiz)
                 .Where(r => r.FechaEmision >= primerDia && r.FechaEmision < FinDeMes)
                 .Select(r => new ReportExcelDto
@@ -225,12 +241,12 @@ namespace EcoSENA.Api.Services
                     Id = r.Id,
                     Titulo = r.Titulo,
                     Descripcion = r.Descripcion,
-                    Ubicacion = r.Ubicacion,
+                    Ubicacion = r.Ambiente.Nombre,
                     Estado = r.Estado.ToString(),
                     FechaPublicacion = r.FechaEmision,
                     FechaRevision = r.FechaRevision,
                     FechaSolucion = r.FechaSolucion,
-                    Aprendiz = $"{r.Aprendiz.Nombre}, {r.Aprendiz.Apellido}"
+                    Aprendiz = $"{r.Aprendiz.Nombre} {r.Aprendiz.Apellido}"
                 })
                 .AsNoTracking()
                 .ToListAsync();
