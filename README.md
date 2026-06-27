@@ -48,14 +48,15 @@ Este endpoint permite a un aprendiz realizar un reporte
 ## /api/Report/$[id] PUT 
 Este enpoint permite a un administrador pasar el reporte al siguiente estado (Pendiente -> En progreso -> Resuelto) pasando el id del reporte que busca actualizar
 
-## /api/Report/ReportsExcel GET 
+## /ReportsExcel GET 
 Este endpoint permite a un administrador tener datos generales de los reportes del mes mas una lista de estos en formato Excel con graficos comparando con los datos en general de la aplicacion
 
 # Estructura de los directorios
 
 - /Data/ : Contiene el contexto de las bases de datos
 - /Entities/ : Contiene las clases que representan las tablas de la base de datos
-- /Services/ : Contiene todos los servicios que usa la aplicacion
+- /Services/ : Contiene todos los servicios que usa la aplicacion para interactuar con los datos que se generan en la aplicacion y guardarlos en la base de datos
 - /Interfaces/ : Contiene todas las interfaces que luego se usan para inyeccion de dependencias de los servicios
 - /Models/ : Contiene los DTOs de la aplicacion
 - /Resources/ : Contiene los recursos de la aplicacion
+- /Controllers/ : Hacen uso de los servicios y exponen sus funcionalidades en los endpoints de la API, tambien aca se realizan las validaciones y se entregan los mensajes de respuesta por cada request a la api
