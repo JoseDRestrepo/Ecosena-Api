@@ -1,9 +1,11 @@
 using CloudinaryDotNet;
 using DotNetEnv;
 using EcoSENA.Api.Data;
+using EcoSENA.Api.Entities;
 using EcoSENA.Api.Interfaces;
 using EcoSENA.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -87,7 +89,7 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSingleton(cloudinary);
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddSingleton<ICensorshipService, CensorshipService>();
-builder.Services.AddSingleton<IPenalizacionService,  PenalizacionService>();
+builder.Services.AddScoped<IPenalizacionService,  PenalizacionService>();
 
 var app = builder.Build();
 
