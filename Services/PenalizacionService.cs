@@ -9,12 +9,10 @@ namespace EcoSENA.Api.Services
     public class PenalizacionService : IPenalizacionService
     {
         private readonly EcosenaDbContext _context;
-        private readonly UserManager<Usuario> _userManager;
 
-        public PenalizacionService(EcosenaDbContext context, UserManager<Usuario> userManager)
+        public PenalizacionService(EcosenaDbContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
 
         public async Task PenalizacionAdmin(int id, int reporteId)
@@ -80,10 +78,11 @@ namespace EcoSENA.Api.Services
 
         private async Task AplicarRolPenalizadoAsync(int aprendizId)
         {
-            var usuario = await _userManager.FindByIdAsync(aprendizId.ToString());
+            var usuario = await _context.Usuarios.FindAsync(aprendizId);
 
-            await _userManager.RemoveFromRoleAsync(usuario, RolUsuario.Aprendiz.ToString());
-            await _userManager.AddToRoleAsync(usuario, RolUsuario.Penalizado.ToString());
+            usuario.Rol = RolUsuario.Penalizado;
+
+            await _context.SaveChangesAsync();
         }
     }
 }
