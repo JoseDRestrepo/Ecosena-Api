@@ -87,6 +87,7 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSingleton(cloudinary);
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddSingleton<ICensorshipService, CensorshipService>();
+builder.Services.AddSingleton<IPenalizacionService,  PenalizacionService>();
 
 var app = builder.Build();
 
