@@ -48,6 +48,12 @@ namespace EcoSENA.Api.Entities
         [StringLength(20)]
         public required RolUsuario Rol { get; set; }
 
+        [Column("failed_login_attempts")]
+        public int FailedLoginAttempts { get; set; } = 0;
+
+        [Column("lockout_end")]
+        public DateTime? LockoutEnd { get; set; }
+
         [JsonIgnore]
         public ICollection<Infraccion> Infracciones { get; set; } = [];
     }
