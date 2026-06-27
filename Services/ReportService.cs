@@ -88,6 +88,8 @@ namespace EcoSENA.Api.Services
             {
                 throw new ArgumentException("La imagen es requerida para el reporte");
             }
+
+            var ambiente = await context.Ambientes.FindAsync(req.IdAmbiente);
             
             var reporte = new Reporte
             {
@@ -101,6 +103,7 @@ namespace EcoSENA.Api.Services
             };
 
             context.Add(reporte);
+            ambiente.ReporteActivo = true;
             await context.SaveChangesAsync();
 
             await context.Entry(reporte).Reference(r => r.Aprendiz).LoadAsync();
@@ -124,6 +127,8 @@ namespace EcoSENA.Api.Services
                 return false;
             }
 
+            var ambiente = await context.Ambientes.FindAsync(reporte.AmbienteId);
+
             reporte.Estado = reporte.Estado switch
             {
                 EstadoReporte.Pendiente => EstadoReporte.EnProgreso,
@@ -138,6 +143,7 @@ namespace EcoSENA.Api.Services
             } else if (reporte.Estado == EstadoReporte.Resuelto)
             {
                 reporte.FechaSolucion = DateTime.UtcNow;
+                ambiente.ReporteActivo = false;
             }
 
             await context.SaveChangesAsync();
