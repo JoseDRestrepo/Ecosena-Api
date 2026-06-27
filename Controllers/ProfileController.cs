@@ -3,6 +3,7 @@ using EcoSENA.Api.Models.Profile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace EcoSENA.Api.Controllers
@@ -10,6 +11,7 @@ namespace EcoSENA.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting("general")]
     public class ProfileController(IProfileService profileService) : ControllerBase
     {
         [HttpGet]
@@ -28,6 +30,7 @@ namespace EcoSENA.Api.Controllers
         }
 
         [HttpPut]
+        [EnableRateLimiting("uploads")]
         public async Task<ActionResult> UpdateProfile(EditProfileReqDto req)
         {
             var id = GetUserIdFromToken();

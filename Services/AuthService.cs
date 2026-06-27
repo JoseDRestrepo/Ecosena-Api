@@ -10,11 +10,13 @@ using EcoSENA.Api.Entities.Sofia;
 using EcoSENA.Api.Interfaces;
 using EcoSENA.Api.Models.Auth;
 
-
 namespace EcoSENA.Api.Services
 {
     public class AuthService(EcosenaDbContext context, SofiaDbContext sofiaContext, IConfiguration configuration) : IAuthService
     {
+        private readonly int _maxFailedAttempts = configuration.GetValue<int?>("Auth:MaxFailedAttempts") ?? 5;
+        private readonly int _lockoutMinutes = configuration.GetValue<int?>("Auth:LockoutMinutes") ?? 15;
+
         public async Task<LoginResDto?> LoginAsync(LoginReqDto req)
         {
             var usuario = await context.Usuarios.FirstOrDefaultAsync(u => u.Documento == req.Documento);
@@ -24,17 +26,62 @@ namespace EcoSENA.Api.Services
                 return null;
             }
 
-            if(!BC.Verify(req.Contraseña, usuario.ContraseñaHash))
+            if (usuario.LockoutEnd.HasValue && usuario.LockoutEnd.Value > DateTime.UtcNow)
             {
-                return null;
+                return new LoginResDto
+                {
+                    IsLocked = true,
+                    LockedUntil = usuario.LockoutEnd,
+                    Message = "Cuenta bloqueada temporalmente por múltiples intentos fallidos."
+                };
             }
+            else if (usuario.LockoutEnd.HasValue && usuario.LockoutEnd.Value <= DateTime.UtcNow)
+            {
+                usuario.LockoutEnd = null;
+                usuario.FailedLoginAttempts = 0;
+                await context.SaveChangesAsync();
+            }
+
+            if (!BC.Verify(req.Contraseña, usuario.ContraseñaHash))
+            {
+                usuario.FailedLoginAttempts++;
+                if (usuario.FailedLoginAttempts >= _maxFailedAttempts)
+                {
+                    usuario.LockoutEnd = DateTime.UtcNow.AddMinutes(_lockoutMinutes);
+                    usuario.FailedLoginAttempts = 0;
+                    await context.SaveChangesAsync();
+
+                    return new LoginResDto
+                    {
+                        IsLocked = true,
+                        LockedUntil = usuario.LockoutEnd,
+                        Message = $"Cuenta bloqueada por {_lockoutMinutes} minutos tras exceder {_maxFailedAttempts} intentos."
+                    };
+                }
+                else
+                {
+                    int remaining = _maxFailedAttempts - usuario.FailedLoginAttempts;
+                    await context.SaveChangesAsync();
+
+                    return new LoginResDto
+                    {
+                        IsLocked = false,
+                        RemainingAttempts = remaining,
+                        Message = "Documento o contraseña incorrectos"
+                    };
+                }
+            }
+
+            usuario.FailedLoginAttempts = 0;
+            usuario.LockoutEnd = null;
+            await context.SaveChangesAsync();
 
             return new LoginResDto { JWT = GenerateToken(usuario) };
         }
 
         public async Task<Usuario?> RegisterAsync(RegisterReqDto req)
         {
-            if(await context.Usuarios.AnyAsync(u => u.Documento == req.Documento))
+            if (await context.Usuarios.AnyAsync(u => u.Documento == req.Documento))
             {
                 return null;
             }
@@ -77,7 +124,7 @@ namespace EcoSENA.Api.Services
             if (string.IsNullOrEmpty(correoSena))
             {
                 return RolUsuario.Aprendiz;
-            } 
+            }
 
             if (correoSena.Split('@').Last() == "sena.edu.co")
             {

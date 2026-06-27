@@ -3,11 +3,13 @@ using EcoSENA.Api.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EcoSENA.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("auth")]
     public class AuthController(IAuthService authService) : ControllerBase
     {
         [HttpPost("register")]
@@ -25,40 +27,37 @@ namespace EcoSENA.Api.Controllers
 
             var usuario = await authService.RegisterAsync(req);
 
-            if(usuario == null)
+            if (usuario == null)
             {
                 return BadRequest("Usuario ya registrado o inexistente en SofiaPlus");
             }
 
-            return StatusCode(StatusCodes.Status201Created, new { message= "Usuario registrado correctamente" });
+            return StatusCode(StatusCodes.Status201Created, new { message = "Usuario registrado correctamente" });
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<LoginResDto?>> Login(LoginReqDto req)
         {
-            var usuario = await authService.LoginAsync(req);
-            
-            if (usuario == null)
+            var result = await authService.LoginAsync(req);
+
+            if (result == null)
             {
+                // mantener mensaje genérico para no filtrar existencia de usuarios
                 return BadRequest("Documento o contraseña incorrectos");
             }
 
-            return Ok(usuario);
-        }
+            if (result.IsLocked)
+            {
+                return StatusCode(423, new { message = result.Message ?? "Cuenta bloqueada", lockedUntil = result.LockedUntil });
+            }
 
-        //ENDPOINTS DE PRUEBA, DESPUES SE ELIMINARAN
-        [Authorize]
-        [HttpPost("logged-user")]
-        public ActionResult Logged()
-        {
-            return Ok("usuario loggeado");
-        }
+            if (string.IsNullOrEmpty(result.JWT))
+            {
+                // credenciales erróneas pero no bloqueado
+                return BadRequest(new { message = result.Message ?? "Documento o contraseña incorrectos", remainingAttempts = result.RemainingAttempts });
+            }
 
-        [Authorize(Roles ="Administrador")]
-        [HttpPost("logged-admin")]
-        public ActionResult LoggedAdmin()
-        {
-            return Ok("admin loggeado");
+            return Ok(result);
         }
     }
 }

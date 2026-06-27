@@ -4,6 +4,7 @@ using EcoSENA.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcoSENA.Api.Migrations
 {
     [DbContext(typeof(EcosenaDbContext))]
-    partial class EcosenaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260626190141_UpdtReportes_Fix")]
+    partial class UpdtReportes_Fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,45 +162,6 @@ namespace EcoSENA.Api.Migrations
                     b.ToTable("Entradas");
                 });
 
-            modelBuilder.Entity("EcoSENA.Api.Entities.Infraccion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AprendizId")
-                        .HasColumnType("int")
-                        .HasColumnName("id_aprendiz");
-
-                    b.Property<DateTime?>("FechaExpiracion")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("fecha_expiracion");
-
-                    b.Property<DateTime>("FechaInfraccion")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("fecha_penalizacion");
-
-                    b.Property<int?>("ReporteId")
-                        .HasColumnType("int")
-                        .HasColumnName("id_reporte");
-
-                    b.Property<int>("Tipo")
-                        .HasMaxLength(20)
-                        .HasColumnType("int")
-                        .HasColumnName("tipo_infraccion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AprendizId");
-
-                    b.HasIndex("ReporteId");
-
-                    b.ToTable("Infracciones");
-                });
-
             modelBuilder.Entity("EcoSENA.Api.Entities.Notificacion", b =>
                 {
                     b.Property<int>("Id")
@@ -330,10 +294,6 @@ namespace EcoSENA.Api.Migrations
                         .HasColumnType("varchar(30)")
                         .HasColumnName("documento");
 
-                    b.Property<int>("FailedLoginAttempts")
-                        .HasColumnType("int")
-                        .HasColumnName("failed_login_attempts");
-
                     b.Property<DateOnly?>("FechaNacimiento")
                         .HasColumnType("date")
                         .HasColumnName("fecha_nacimiento");
@@ -346,10 +306,6 @@ namespace EcoSENA.Api.Migrations
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("foto_perfil");
-
-                    b.Property<DateTime?>("LockoutEnd")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("lockout_end");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -376,10 +332,9 @@ namespace EcoSENA.Api.Migrations
                         {
                             Id = 1,
                             Apellido = "Bohorquez",
-                            ContraseñaHash = "$2a$11$RcBhlIcVD0O8R1iDW.MOoelDwPQWmhaZXK6ACMyPtfefHJPNUD4wW",
+                            ContraseñaHash = "$2a$11$M8juu4wWI6tVbS6xDt62K.PsIpxM0G9..1DirLywkdAe79vitYhbe",
                             Correo = "juan_bquez@soy.sena.edu.co",
                             Documento = "0123456789",
-                            FailedLoginAttempts = 0,
                             Ficha = 333333,
                             FotoPerfil = "https://res.cloudinary.com/denixbxml/image/upload/v1780584233/pfp_yutpht.png",
                             Nombre = "Juan",
@@ -390,10 +345,9 @@ namespace EcoSENA.Api.Migrations
                         {
                             Id = 2,
                             Apellido = "Nasraoui Ebana",
-                            ContraseñaHash = "$2a$11$zlk6og0HbbZDoLUQvhmBIOXNoy3zy074xah16Gc9AZoJ8wptHjolW",
+                            ContraseñaHash = "$2a$11$mxHjvlal9murxeM831cwM.xDRgkW/7855DGO37ppH0kAsarxRIlI6",
                             Correo = "lamine_yamal@sena.edu.co",
                             Documento = "1111111111",
-                            FailedLoginAttempts = 0,
                             FechaNacimiento = new DateOnly(2007, 7, 13),
                             FotoPerfil = "https://res.cloudinary.com/denixbxml/image/upload/v1780584233/pfp_yutpht.png",
                             Nombre = "Lamine Yamal",
@@ -410,23 +364,6 @@ namespace EcoSENA.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Redactor");
-                });
-
-            modelBuilder.Entity("EcoSENA.Api.Entities.Infraccion", b =>
-                {
-                    b.HasOne("EcoSENA.Api.Entities.Usuario", "Aprendiz")
-                        .WithMany("Infracciones")
-                        .HasForeignKey("AprendizId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EcoSENA.Api.Entities.Reporte", "Reporte")
-                        .WithMany()
-                        .HasForeignKey("ReporteId");
-
-                    b.Navigation("Aprendiz");
-
-                    b.Navigation("Reporte");
                 });
 
             modelBuilder.Entity("EcoSENA.Api.Entities.Notificacion", b =>
@@ -465,11 +402,6 @@ namespace EcoSENA.Api.Migrations
                     b.Navigation("Ambiente");
 
                     b.Navigation("Aprendiz");
-                });
-
-            modelBuilder.Entity("EcoSENA.Api.Entities.Usuario", b =>
-                {
-                    b.Navigation("Infracciones");
                 });
 #pragma warning restore 612, 618
         }

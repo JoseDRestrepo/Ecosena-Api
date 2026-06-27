@@ -19,10 +19,6 @@ namespace EcoSENA.Api.Entities
         [StringLength(150)]
         public required string Descripcion { get; set; }
 
-        [Column("ubicacion")]
-        [StringLength(100)]
-        public required string Ubicacion { get; set; }
-
         [Column("foto")]
         public required string Foto { get; set; }
 
@@ -41,6 +37,12 @@ namespace EcoSENA.Api.Entities
 
         [Column("id_aprendiz")]
         public int AprendizId { get; set; }
+
+        [Column("id_ambiente")]
+        public int AmbienteId { get; set; }
+
+        [ForeignKey(nameof(AmbienteId))]
+        public Ambiente Ambiente { get; set; }
 
         [ForeignKey(nameof(AprendizId))]
         public Usuario Aprendiz { get; set; }

@@ -4,10 +4,12 @@ using EcoSENA.Api.Data;
 using EcoSENA.Api.Interfaces;
 using EcoSENA.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
+using System.Threading.RateLimiting;
 
 Env.Load();
 
@@ -41,6 +43,35 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddFixedWindowLimiter("auth", config =>
+    {
+        config.PermitLimit = 5;
+        config.Window = TimeSpan.FromMinutes(1);
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 0;
+    });
+
+    options.AddFixedWindowLimiter("general", config =>
+    {
+        config.PermitLimit = 60;                         
+        config.Window = TimeSpan.FromMinutes(1);         
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 5;
+    });
+
+    options.AddFixedWindowLimiter("uploads", config =>
+    {
+        config.PermitLimit = 10;                         
+        config.Window = TimeSpan.FromMinutes(1);         
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 0;
+    });
+});
+
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 
 var cloudinary = new Cloudinary(new Account(
@@ -55,6 +86,7 @@ builder.Services.AddScoped<IBlogService,  BlogService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSingleton(cloudinary);
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddSingleton<ICensorshipService, CensorshipService>();
 
 var app = builder.Build();
 
