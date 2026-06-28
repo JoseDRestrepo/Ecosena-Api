@@ -83,10 +83,10 @@ var cloudinary = new Cloudinary(new Account(
         cloudinaryConfig["ApiSecret"]
     ));
 
-builder.Services.AddHttpClient<ResendClient>();
-builder.Services.Configure<ResendClientOptions>(options =>
-    options.ApiToken = builder.Configuration["Resend:ApiKey"]!);
-builder.Services.AddTransient<IResend, ResendClient>();
+//builder.Services.AddHttpClient<ResendClient>();
+//builder.Services.Configure<ResendClientOptions>(options =>
+//    options.ApiToken = builder.Configuration["Resend:ApiKey"]!);
+//builder.Services.AddTransient<IResend, ResendClient>();
 builder.Services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
