@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Resend;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -82,6 +83,11 @@ var cloudinary = new Cloudinary(new Account(
         cloudinaryConfig["ApiSecret"]
     ));
 
+//builder.Services.AddHttpClient<ResendClient>();
+//builder.Services.Configure<ResendClientOptions>(options =>
+//    options.ApiToken = builder.Configuration["Resend:ApiKey"]!);
+//builder.Services.AddTransient<IResend, ResendClient>();
+builder.Services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IBlogService,  BlogService>();
@@ -90,6 +96,8 @@ builder.Services.AddSingleton(cloudinary);
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddSingleton<ICensorshipService, CensorshipService>();
 builder.Services.AddScoped<IPenalizacionService,  PenalizacionService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IRecuperacionService, RecuperacionService>();
 
 var app = builder.Build();
 
