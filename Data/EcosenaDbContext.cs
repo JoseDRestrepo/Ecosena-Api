@@ -12,6 +12,7 @@ namespace EcoSENA.Api.Data
         public DbSet<Notificacion> Notificaciones { get; set; }
         public DbSet<Ambiente> Ambientes { get; set; }
         public DbSet<Infraccion> Infracciones { get; set; }
+        public DbSet<TokenRecuperacion> TokensRecuperacion { get; set; }
 
         //datos de ejemplo
         protected override void OnModelCreating(ModelBuilder modelBuilder)
