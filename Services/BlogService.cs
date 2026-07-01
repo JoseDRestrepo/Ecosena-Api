@@ -40,24 +40,30 @@ namespace EcoSENA.Api.Services
                 Contenido = entrada.Contenido,
                 FechaPublicacion = entrada.FechaPublicacion,
                 NombreRedactor = $"{entrada.Redactor.Nombre} {entrada.Redactor.Apellido}",
-                Portada = entrada.Portada
+                Portada = entrada.Portada,
+                RedactorFoto = entrada.Redactor.FotoPerfil
             };
         }
 
-        public async Task<List<BlogListResDto>> GetEntradasAsync()
+        public async Task<List<BlogListResDto>> GetEntradasAsync(string? busqueda = null)
         {
-            var entradas = await context.Entradas.Include(e => e.Redactor)
+            var query = context.Entradas.Include(e => e.Redactor)
                 .OrderByDescending(e => e.FechaPublicacion)
-                .Select(e => new BlogListResDto
-                {
-                    Id = e.Id,
-                    Titulo = e.Titulo,
-                    FechaPublicacion= e.FechaPublicacion,
-                    NombreRedactor = $"{e.Redactor.Nombre} {e.Redactor.Apellido}",
-                    Portada= e.Portada
-                }).ToListAsync();
+                .AsQueryable();
 
-            return entradas;
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                query = query.Where(e => EF.Functions.Like(e.Titulo, $"%{busqueda}%"));
+            }
+
+            return await query.Select(e => new BlogListResDto
+            {
+                Id = e.Id,
+                Titulo = e.Titulo,
+                FechaPublicacion = e.FechaPublicacion,
+                NombreRedactor = $"{e.Redactor.Nombre} {e.Redactor.Apellido}",
+                Portada = e.Portada
+            }).ToListAsync();
         }
 
         public async Task<EntradaResDto> PostEntradaAsync(PostEntradaReqDto req, int redactorId)

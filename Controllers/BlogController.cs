@@ -16,9 +16,9 @@ namespace EcoSENA.Api.Controllers
     {
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<List<BlogListResDto>>> GetEntradas()
+        public async Task<ActionResult<List<BlogListResDto>>> GetEntradas([FromQuery] string? titulo = null)
         {
-            var entradas = await service.GetEntradasAsync();
+            var entradas = await service.GetEntradasAsync(titulo);
 
             return Ok(entradas);
         }

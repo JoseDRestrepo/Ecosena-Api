@@ -106,7 +106,7 @@ namespace EcoSENA.Api.Controllers
         [Authorize(Roles= "Administrador")]
         public async Task<ActionResult<StatsReportDto>> GetEstadisticas()
         {
-            return Ok(service.GetStats());
+            return Ok(await service.GetStats());
         } 
 
         [HttpGet("/ReportsExcel")]
