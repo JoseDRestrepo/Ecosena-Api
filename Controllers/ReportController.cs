@@ -70,8 +70,8 @@ namespace EcoSENA.Api.Controllers
 
             if (censorship.EsSoez(req.Descripcion) || censorship.EsSoez(req.Titulo))
             {
-                return BadRequest("El contenido del reporte no puede contener palabras soeces");
                 await penalizacion.RegistrarIntento(AprendizId);
+                return BadRequest("El contenido del reporte no puede contener palabras soeces");     
             }
 
             var ambienteActivo = await service.ReporteActivo(req.IdAmbiente);
