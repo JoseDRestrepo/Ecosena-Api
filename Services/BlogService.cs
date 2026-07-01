@@ -40,7 +40,8 @@ namespace EcoSENA.Api.Services
                 Contenido = entrada.Contenido,
                 FechaPublicacion = entrada.FechaPublicacion,
                 NombreRedactor = $"{entrada.Redactor.Nombre} {entrada.Redactor.Apellido}",
-                Portada = entrada.Portada
+                Portada = entrada.Portada,
+                RedactorFoto = entrada.Redactor.FotoPerfil
             };
         }
 

@@ -60,6 +60,7 @@ namespace EcoSENA.Api.Services
                 Id = reporte.Id,
                 Titulo = reporte.Titulo,
                 Descripcion = reporte.Descripcion,
+                Foto = reporte.Foto,
                 Estado = reporte.Estado,
                 EmisorReporte = $"{reporte.Aprendiz.Nombre} {reporte.Aprendiz.Apellido}"
             };
