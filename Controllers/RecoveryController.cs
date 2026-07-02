@@ -2,6 +2,7 @@
 using EcoSENA.Api.Models.Recover;
 using EcoSENA.Api.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace EcoSENA.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
+    [EnableCors("AllowRecovery")]
     public class RecoveryController(IRecuperacionService service) : ControllerBase
     {
         [HttpPost("solicitar")]
