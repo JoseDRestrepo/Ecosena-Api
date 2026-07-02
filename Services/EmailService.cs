@@ -34,7 +34,7 @@ namespace EcoSENA.Api.Services
 
             using var smtp = new SmtpClient();
             smtp.Timeout = 20000;
-            await smtp.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
+            await smtp.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.SslOnConnect);
             await smtp.AuthenticateAsync(_from, _password);
             await smtp.SendAsync(mensaje);
             await smtp.DisconnectAsync(true);
