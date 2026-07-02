@@ -157,8 +157,7 @@ namespace EcoSENA.Api.Services
             var primerDia = new DateTime(fechaActual.Year, fechaActual.Month, 1);
             var FinDeMes = primerDia.AddMonths(1);
 
-            var totalReportesMes = await context.Reportes
-                .Where(r => r.FechaEmision >= primerDia && r.FechaEmision <= FinDeMes)
+            var totalReportes = await context.Reportes
                 .CountAsync();
 
             var totalPendientes = await context.Reportes
@@ -169,16 +168,19 @@ namespace EcoSENA.Api.Services
                 .Where(r => r.Estado == EstadoReporte.EnProgreso)
                 .CountAsync();
 
-            var totalResueltosMes = await context.Reportes
-                .Where(r => r.FechaSolucion >= primerDia && r.FechaSolucion <= FinDeMes)
+            var totalResueltos = await context.Reportes
+                .Where(r => r.Estado == EstadoReporte.Resuelto)
                 .CountAsync();
+
+            double porcentaje(int dato) =>
+                dato > 0 ? Math.Round((double)dato * 100 / totalReportes, 2) : 0;
 
             return new StatsReportDto
             {
-                ReportesHechosMes = totalReportesMes,
-                ReportesPendientes = totalPendientes,
-                ReportesEnProgreso = totalEnProgreso,
-                ReportesResueltosMes = totalResueltosMes
+                ReportesHechos = totalReportes,
+                ReportesPendientes = porcentaje(totalPendientes),
+                ReportesEnProgreso = porcentaje(totalEnProgreso),
+                ReportesResueltos = porcentaje(totalResueltos)
             };
         }
 

@@ -10,5 +10,6 @@ namespace EcoSENA.Api.Models.Reports
         public string EmisorReporte { get; set; } = string.Empty;
         public string Foto { get; set; } = string.Empty; 
         public EstadoReporte Estado { get; set; }
+        public string EmisorFoto { get; set; } = string.Empty;
     }
 }
