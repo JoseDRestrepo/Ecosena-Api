@@ -9,6 +9,8 @@ namespace EcoSENA.Api.Services
     {
         private readonly string _from = configuration["Email:From"]!;
         private readonly string _password = configuration["Email:Password"]!;
+        private readonly string _smtpHost = configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
+        private readonly int _smtpPort = int.Parse(configuration["Email:SmtpPort"] ?? "587");
 
         public async Task EnviarCodigoRecuperacionAsync(string destinatario, string codigo)
         {
@@ -31,7 +33,8 @@ namespace EcoSENA.Api.Services
             };
 
             using var smtp = new SmtpClient();
-            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+            smtp.Timeout = 20000;
+            await smtp.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
             await smtp.AuthenticateAsync(_from, _password);
             await smtp.SendAsync(mensaje);
             await smtp.DisconnectAsync(true);

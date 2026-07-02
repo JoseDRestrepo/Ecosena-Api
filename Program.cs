@@ -95,7 +95,19 @@ builder.Services.AddScoped<IPenalizacionService,  PenalizacionService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IRecuperacionService, RecuperacionService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowRecovery", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
