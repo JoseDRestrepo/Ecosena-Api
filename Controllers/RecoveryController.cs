@@ -11,7 +11,6 @@ namespace EcoSENA.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
-    [EnableCors("AllowRecovery")]
     public class RecoveryController(IRecuperacionService service) : ControllerBase
     {
         [HttpPost("solicitar")]
