@@ -21,9 +21,8 @@
       - Cloudinary__ApiKey=${CLOUD_API_KEY}
       - Cloudinary__ApiSecret=${CLOUD_API_SECRET}
       - Email__From=${EMAIL_FROM}
-      - Email__Password=${EMAIL_PASSWORD}
-      - Email__SmtpHost=smtp.gmail.com
-      - Email__SmtpPort=587
+      - Email__FromName=ECOSENA
+      - Brevo__ApiKey=${BREVO_APIKEY}
     networks:
       - ecosena_backend
 
