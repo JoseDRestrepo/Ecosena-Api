@@ -11,5 +11,7 @@
         public DateTime FechaPublicacion { get; set; }
 
         public string NombreRedactor { get; set; } = string.Empty;
+
+        public string FotoRedactor { get; set; } = string.Empty;
     }
 }
